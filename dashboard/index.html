@@ -4,52 +4,72 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <meta name="theme-color" content="#ffffff" />
-<title>모바일 제품 스펙 대시보드</title>
+<title>모바일 제품 비교 AI플랫폼</title>
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
 <header class="hero">
-  <p class="kicker">News_doc · Spec Search</p>
-  <h1>제조사 × 카테고리<br/>모바일 스펙 검색</h1>
-  <p class="lede">10개 글로벌 제조사의 핵심 라인업을 한 화면에서.</p>
+  <p class="kicker">News_doc · AI Compare</p>
+  <h1>모바일 제품 비교<br/>AI플랫폼</h1>
+  <p class="lede">자연어로 묻고, 제품을 즉시 비교하세요. 80여 개 글로벌 라인업.</p>
 </header>
 
-<section class="ai">
-  <label class="ai-field">
-    <span class="visually-hidden">AI 검색</span>
-    <span class="ai-icon" aria-hidden="true">✦</span>
-    <input id="ai-q" type="text" autocomplete="off"
-           placeholder="AI로 찾기 — 예: 5G 폴더블 추천, 아이폰이랑 갤럭시 비교" />
-    <span class="ai-status" id="ai-status" aria-live="polite" title="LLM 연결 상태">
+<!-- ========== 통합 입력창 ========== -->
+<section class="input-shell">
+  <label class="ask-field">
+    <span class="visually-hidden">질문 또는 검색</span>
+    <span class="ask-icon" aria-hidden="true">✦</span>
+    <input id="ask" type="text" autocomplete="off"
+           placeholder="검색 또는 자연어로 질문 — 예: 갤럭시 폴드7 vs 아이폰 17 프로, 2025 폴더블 추천" />
+    <button type="button" id="ask-go" class="ask-go" aria-label="실행">→</button>
+  </label>
+  <div class="ask-meta">
+    <span class="ai-status" id="ai-status" title="AI 엔진 상태">
       <span class="ai-dot" data-state="checking"></span>
       <span class="ai-status-label">연결 확인 중</span>
     </span>
-    <button type="button" id="ai-go" class="ai-go" aria-label="AI 검색 실행">→</button>
-  </label>
-  <p class="ai-hint" id="ai-hint">Ollama가 켜져 있으면 자연어로 질문할 수 있어요. 꺼져 있으면 키워드 매칭 모드로 동작합니다.</p>
+    <button type="button" class="settings-btn" id="open-settings" aria-label="AI 설정">설정</button>
+    <span class="result-count" id="count">전체 –</span>
+  </div>
 </section>
 
-<section class="search">
-  <label class="search-field">
-    <span class="visually-hidden">검색</span>
-    <input id="q" type="search" placeholder="모델, 칩, 키워드 검색" autocomplete="off" />
-  </label>
-  <p class="result-count" id="count" aria-live="polite">전체 –</p>
-</section>
-
+<!-- ========== 필터 칩 ========== -->
 <section class="filters" aria-label="필터">
-  <details class="filter-group" open>
+  <details class="filter-group">
     <summary>제조사</summary>
-    <div class="chip-row" id="mfr-chips" role="group" aria-label="제조사 필터"></div>
+    <div class="chip-row" id="mfr-chips" role="group"></div>
   </details>
-  <details class="filter-group" open>
+  <details class="filter-group">
     <summary>카테고리</summary>
-    <div class="chip-row" id="cat-chips" role="group" aria-label="카테고리 필터"></div>
+    <div class="chip-row" id="cat-chips" role="group"></div>
   </details>
 </section>
 
-<main id="grid" class="grid" aria-live="polite"></main>
+<!-- ========== 분할 레이아웃 ========== -->
+<div class="split">
+  <!-- 왼쪽: 카드 그리드 -->
+  <main id="grid" class="grid" aria-live="polite"></main>
+
+  <!-- 오른쪽: AI 응답 패널 -->
+  <aside class="ai-panel" aria-label="AI 응답">
+    <header class="ai-panel-head">
+      <h2>AI 인사이트</h2>
+      <span class="ai-engine" id="ai-engine">대기 중</span>
+    </header>
+    <div class="ai-panel-body" id="ai-body">
+      <div class="ai-empty">
+        <p class="ai-empty-title">자연어로 질문해 보세요.</p>
+        <ul class="ai-empty-list">
+          <li>"갤럭시 Z Fold7 vs 아이폰 17 프로 맥스"</li>
+          <li>"2025년에 나온 폴더블 추천"</li>
+          <li>"가성비 좋은 게이밍 폰"</li>
+          <li>"Vision Pro M5 특징"</li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+</div>
 
 <section class="empty" id="empty" hidden>
   <p>조건에 맞는 제품이 없어요.</p>
@@ -57,15 +77,15 @@
 </section>
 
 <footer class="foot">
-  <p>출처: 제조사 정보_검색용.pdf · 디자인: Apple Minimalism</p>
+  <p>출처: 제조사 정보_검색용.pdf · 데이터: 2024–2026 출시/발표 기준 · 디자인: Apple Minimalism</p>
 </footer>
 
-<!-- ===== Comparison sticky bar ===== -->
+<!-- ========== 비교 트레이 + 모달 (이전 PR에서 유지) ========== -->
 <aside class="cmp-bar" id="cmp-bar" hidden aria-label="비교 트레이">
   <div class="cmp-inner">
     <div class="cmp-slots">
-      <div class="cmp-slot" data-slot="0"><span class="cmp-slot-empty">슬롯 1</span></div>
-      <div class="cmp-slot" data-slot="1"><span class="cmp-slot-empty">슬롯 2</span></div>
+      <div class="cmp-slot" data-slot="0"><span>슬롯 1</span></div>
+      <div class="cmp-slot" data-slot="1"><span>슬롯 2</span></div>
     </div>
     <div class="cmp-actions">
       <button type="button" id="cmp-clear" class="cmp-btn cmp-btn-ghost">비우기</button>
@@ -74,7 +94,6 @@
   </div>
 </aside>
 
-<!-- ===== Comparison modal ===== -->
 <div class="cmp-modal" id="cmp-modal" hidden role="dialog" aria-modal="true" aria-labelledby="cmp-modal-title">
   <div class="cmp-modal-backdrop" data-close></div>
   <div class="cmp-modal-card">
@@ -83,6 +102,40 @@
       <button type="button" class="cmp-close" data-close aria-label="닫기">×</button>
     </header>
     <div class="cmp-modal-body" id="cmp-modal-body"></div>
+  </div>
+</div>
+
+<!-- ========== AI 설정 모달 ========== -->
+<div class="cmp-modal" id="settings-modal" hidden role="dialog" aria-modal="true">
+  <div class="cmp-modal-backdrop" data-close></div>
+  <div class="cmp-modal-card">
+    <header class="cmp-modal-head">
+      <h2>AI 엔진 설정</h2>
+      <button type="button" class="cmp-close" data-close aria-label="닫기">×</button>
+    </header>
+    <div class="cmp-modal-body settings-body">
+      <p class="settings-p">3가지 엔진을 우선순위 순서로 자동 사용합니다.</p>
+      <div class="setting-row">
+        <h3>1. Ollama (로컬)</h3>
+        <p>localhost:11434 · 무료 · README 참고</p>
+        <p class="hint" id="ollama-hint">상태 확인 중…</p>
+      </div>
+      <div class="setting-row">
+        <h3>2. Groq API 키</h3>
+        <p>무료 티어 · 매우 빠름 · llama-3.3-70b 호출</p>
+        <input type="password" id="groq-key" placeholder="gsk_..." class="key-input" />
+        <button type="button" class="cmp-btn cmp-btn-ghost" data-save="groq">저장</button>
+        <button type="button" class="cmp-btn cmp-btn-ghost" data-clear="groq">지우기</button>
+      </div>
+      <div class="setting-row">
+        <h3>3. Google Gemini API 키</h3>
+        <p>무료 티어 · gemini-2.0-flash 호출</p>
+        <input type="password" id="gemini-key" placeholder="AIza..." class="key-input" />
+        <button type="button" class="cmp-btn cmp-btn-ghost" data-save="gemini">저장</button>
+        <button type="button" class="cmp-btn cmp-btn-ghost" data-clear="gemini">지우기</button>
+      </div>
+      <p class="settings-foot">키는 이 브라우저의 localStorage 에만 저장됩니다. 서버 전송 없음.</p>
+    </div>
   </div>
 </div>
 
