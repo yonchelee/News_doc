@@ -22,33 +22,105 @@
   }
 
   // 한국어 별칭 → 영문 키워드 매핑 (검색 향상)
+  // 순서 중요: 더 긴 패턴(예: "폴드7")이 짧은 패턴(예: "폴드")보다 먼저 와야 함
   const ALIASES = [
+    // 제조사
     ["갤럭시", "Galaxy Samsung"], ["삼성", "Samsung"],
-    ["아이폰", "iPhone Apple"], ["애플", "Apple"], ["애플워치", "Apple Watch"],
+    ["아이폰", "iPhone Apple"], ["애플워치", "Apple Watch"], ["애플", "Apple"],
     ["에어팟", "AirPods"], ["비전프로", "Vision Pro"], ["비전", "Vision"],
     ["픽셀", "Pixel Google"], ["구글", "Google"],
-    ["샤오미", "Xiaomi"], ["미", "Mi"], ["레드미", "Redmi"],
+    ["샤오미", "Xiaomi"], ["레드미", "Redmi"],
     ["화웨이", "Huawei"], ["메이트", "Mate"], ["퓨라", "Pura"],
     ["오포", "OPPO"], ["비보", "Vivo"], ["파인드", "Find"],
     ["메타", "Meta"], ["퀘스트", "Quest"], ["레이밴", "Ray-Ban"],
     ["모토로라", "Motorola"], ["레이저", "Razr"], ["엣지", "Edge"],
     ["소니", "Sony"], ["엑스페리아", "Xperia"], ["플레이스테이션", "PlayStation"],
     ["에이수스", "Asus"], ["로그", "ROG"], ["젠폰", "Zenfone"],
-    ["폴드", "Fold"], ["플립", "Flip"], ["폴더블", "foldable Fold Flip"],
+    // 형태 — 숫자 attached 우선
+    ["폴드", "Fold Z"], ["플립", "Flip Z"], ["폴더블", "foldable Fold Flip"],
     ["워치", "Watch"], ["반지", "Ring"], ["밴드", "Band"],
     ["태블릿", "tablet Pad iPad Tab"], ["탭", "Tab"], ["패드", "Pad iPad"],
     ["글래스", "Glass"], ["글라스", "Glass"],
+    // 등급 — "프로맥스" 같은 합성도 분해
+    ["프로맥스", "Pro Max"], ["프로 맥스", "Pro Max"],
     ["프로", "Pro"], ["맥스", "Max"], ["울트라", "Ultra"], ["미니", "mini"],
+    ["엣지", "Edge"], ["에어", "Air"],
+    // 카테고리/일반어
     ["게이밍", "gaming ROG"], ["게임", "gaming"],
     ["스마트폰", "smartphone phone"], ["폰", "phone"]
   ];
 
+  // 한국어 모델 → 정확한 모델명 직접 매핑 (특히 폼팩터 + 숫자 조합)
+  // 순서 중요: 긴 패턴 먼저
+  const MODEL_HINTS = [
+    // Samsung 폴더블
+    [/(?:갤럭시\s*)?(?:z\s*)?폴드\s*(\d+)/i,    "Galaxy Z Fold$1"],
+    [/(?:갤럭시\s*)?(?:z\s*)?플립\s*(\d+)/i,    "Galaxy Z Flip$1"],
+    [/(?:갤럭시\s*)?s\s*(\d+)\s*울트라/i,        "Galaxy S$1 Ultra"],
+    [/(?:갤럭시\s*)?s\s*(\d+)\s*\+/i,           "Galaxy S$1+"],
+    [/(?:갤럭시\s*)?s\s*(\d+)\s*엣지/i,          "Galaxy S$1 Edge"],
+    // iPhone — "프로17맥스" 같은 압축 폼 처리
+    [/아이폰\s*(\d+)\s*프로\s*맥스/i,            "iPhone $1 Pro Max"],
+    [/아이폰\s*(\d+)\s*프로/i,                  "iPhone $1 Pro"],
+    [/아이폰\s*프로\s*(\d+)\s*맥스/i,            "iPhone $1 Pro Max"],
+    [/아이폰\s*맥스\s*(\d+)\s*프로/i,            "iPhone $1 Pro Max"],
+    [/아이폰\s*에어/i,                          "iPhone Air"],
+    [/아이폰\s*(\d+)\s*e/i,                     "iPhone $1e"],
+    [/아이폰\s*(\d+)/i,                         "iPhone $1"],
+    // Pixel
+    [/픽셀\s*(\d+)\s*프로\s*xl/i,               "Pixel $1 Pro XL"],
+    [/픽셀\s*(\d+)\s*프로\s*폴드/i,              "Pixel $1 Pro Fold"],
+    [/픽셀\s*(\d+)\s*프로/i,                    "Pixel $1 Pro"],
+    [/픽셀\s*워치\s*(\d+)/i,                    "Pixel Watch $1"],
+    [/픽셀\s*(\d+)a/i,                          "Pixel $1a"],
+    [/픽셀\s*(\d+)/i,                           "Pixel $1"],
+    // Vision Pro / Quest / 기타
+    [/비전\s*프로\s*m(\d+)/i,                   "Vision Pro M$1"],
+    [/비전\s*프로\s*(\d+)/i,                    "Vision Pro $1"],
+    [/퀘스트\s*(\d+)/i,                         "Quest $1"]
+  ];
+
+  // 토큰화: 한국어/영문/숫자 단위로 쪼갬, 공백 무시
+  function tokensOf(s){
+    return (s || "").toLowerCase()
+      .replace(/[,·/\.]/g, " ")
+      .split(/\s+/).filter(Boolean);
+  }
+
+  // 압축 토큰: 공백 제거된 정규화 (예: "iphone17promax")
+  function condense(s){
+    return (s || "").toLowerCase().replace(/\s+/g, "");
+  }
+
+  // expand: 한국어 alias 추가 + 모델 힌트로 추출된 정확 모델명 추가
   function expandQuery(q){
     let s = q;
+    // 1) 모델 힌트로 정확 모델명 추출 (가장 강한 신호)
+    MODEL_HINTS.forEach(([re, repl]) => {
+      const m = q.match(re);
+      if (m) {
+        const exact = repl.replace(/\$(\d+)/g, (_, i) => m[parseInt(i,10)]);
+        s += " " + exact;
+      }
+    });
+    // 2) alias 단순 substring 매핑
     ALIASES.forEach(([kr, en]) => {
       if (s.includes(kr)) s += " " + en;
     });
     return s;
+  }
+
+  // 모델 힌트 적중을 별도로 추출 — 정확 매칭 우선순위 부여용
+  function exactModelHints(q){
+    const hits = [];
+    MODEL_HINTS.forEach(([re, repl]) => {
+      const m = q.match(re);
+      if (m) {
+        const exact = repl.replace(/\$(\d+)/g, (_, i) => m[parseInt(i,10)]);
+        hits.push(exact);
+      }
+    });
+    return hits;
   }
 
   // ============ DOM helpers ============
@@ -223,40 +295,101 @@ ${list}${specContext}`;
 
   // ---- 키워드 폴백 ----
   function scoreByQuery(q){
+    if (!q || !q.trim()) return [];
+    const exactHints = exactModelHints(q);   // ["Galaxy Z Fold7", "iPhone 17 Pro Max", ...]
     const expanded = expandQuery(q).toLowerCase();
     const tokens = expanded.split(/[\s,·/]+/).filter(t => t.length >= 1);
+    const condQ = condense(q);                // "갤럭시폴드7vs아이폰프로17맥스..."
+
     return PRODUCTS.map(p => {
       const m = MANUFACTURERS.find(x => x.key === p.mfr);
       const c = CATEGORIES.find(x => x.key === p.category);
       const hay = [p.model, p.highlight, m && m.name, c && c.label, String(p.year)]
         .filter(Boolean).join(" ").toLowerCase();
+      const condModel = condense(p.model);
+
       let score = 0;
+      // 1) 정확 모델 힌트 매칭 — 가장 강한 신호 (각 50점)
+      exactHints.forEach(hint => {
+        if (hint.toLowerCase() === p.model.toLowerCase()) score += 50;
+      });
+      // 2) 압축 모델명이 압축 쿼리에 등장 (예: "iphone17promax" in "갤럭시폴드7이랑아이폰프로17맥스...")
+      if (condQ.indexOf(condModel) !== -1) score += 20;
+      // 3) 일반 토큰 매칭 (각 1점)
       tokens.forEach(t => { if (hay.indexOf(t) !== -1) score += 1; });
+      // 4) 숫자 토큰 정확 매칭 보너스 — "7"이 모델명에 있고 쿼리에도 있으면 +3
+      const queryNums = (q.match(/\d+/g) || []);
+      const modelNums = (p.model.match(/\d+/g) || []);
+      queryNums.forEach(qn => {
+        if (modelNums.indexOf(qn) !== -1) score += 3;
+      });
+      // 5) 모델명 자체에 토큰 직접 매칭 — 추가 보너스
+      tokens.forEach(t => { if (p.model.toLowerCase().indexOf(t) !== -1) score += 2; });
+
       return { p, score };
     }).filter(x => x.score > 0).sort((a,b) => b.score - a.score);
   }
 
+  // 비교 패턴 분리: "이랑/랑/와/과 ... 비교" 또는 "vs" 같은 모든 변형 처리
+  function splitComparePair(q){
+    // 우선 'vs' / 'versus' 로 명시적 split
+    let parts = q.split(/\s*(?:vs|VS|versus|Versus|VERSUS)\s*/).filter(Boolean);
+    if (parts.length >= 2) return parts;
+
+    // "X 비교 Y" 형태
+    parts = q.split(/\s*비교\s*(?:해\s*달라|해줘|해|할|하|—)?\s*/).filter(Boolean);
+    if (parts.length >= 2) return parts;
+
+    // "X 이랑 Y", "X 랑 Y", "X 와 Y", "X 과 Y" — 단, 마지막에 "비교" 같은 게 와야 의도 확실
+    if (/비교|차이/.test(q)){
+      // 한국어 접속 조사로 split, 마지막 토큰의 "비교/차이/...해" 같은 꼬리는 제거
+      parts = q.split(/\s*(?:이랑|랑|와|과|또는)\s+/).filter(Boolean);
+      if (parts.length >= 2){
+        // 마지막 part에서 "비교해달라", "비교", "차이" 등 꼬리 제거
+        parts[parts.length - 1] = parts[parts.length - 1]
+          .replace(/\s*(?:비교\s*해\s*달라|비교\s*해\s*줘|비교\s*해|비교|차이|어때|뭐가\s*달라)\s*$/, "")
+          .trim();
+        return parts.filter(Boolean);
+      }
+    }
+    return [];
+  }
+
   function keywordFallback(userQ){
-    const wantsCompare = /비교|vs|versus|둘\s*중|차이/.test(userQ);
+    const wantsCompare = /비교|vs|versus|둘\s*중|차이/i.test(userQ);
 
     let matches = [];
+
+    // 0) 정확 모델 힌트가 2개 이상 떨어졌으면 즉시 사용
     if (wantsCompare){
-      // "A vs B" 패턴 — vs/비교 기준 분리 후 양쪽 따로 매칭
-      const parts = userQ.split(/\s*(?:vs|VS|versus|와\s*비교|랑\s*비교)\s*|\s*비교\s*/).filter(Boolean);
+      const hints = exactModelHints(userQ)
+        .filter(h => PRODUCTS.some(p => p.model === h));
+      if (hints.length >= 2){
+        matches = [hints[0], hints[1]];
+      }
+    }
+
+    // 1) 비교 패턴 → 양쪽 split 후 각각 scoreByQuery
+    if (matches.length < 2 && wantsCompare){
+      const parts = splitComparePair(userQ);
       if (parts.length >= 2){
         const left  = scoreByQuery(parts[0])[0];
         const right = scoreByQuery(parts[1])[0];
         if (left)  matches.push(left.p.model);
         if (right && right.p.model !== (left && left.p.model)) matches.push(right.p.model);
       }
-      if (matches.length < 2){
-        const all = scoreByQuery(userQ);
-        for (const x of all){
-          if (matches.indexOf(x.p.model) === -1) matches.push(x.p.model);
-          if (matches.length >= 2) break;
-        }
+    }
+
+    // 2) 그래도 부족하면 전체 쿼리 점수 기반 폴백
+    if (wantsCompare && matches.length < 2){
+      const all = scoreByQuery(userQ);
+      for (const x of all){
+        if (matches.indexOf(x.p.model) === -1) matches.push(x.p.model);
+        if (matches.length >= 2) break;
       }
-    } else {
+    }
+
+    if (!wantsCompare){
       matches = scoreByQuery(userQ).slice(0, 6).map(x => x.p.model);
     }
     let body;
@@ -374,13 +507,10 @@ ${list}${specContext}`;
       thumb.className = "thumb";
       if (p.imageUrl){
         const img = document.createElement("img");
+        img.src = p.imageUrl;
         img.alt = p.model;
+        img.loading = "lazy";
         img.referrerPolicy = "no-referrer";
-        img.decoding = "async";
-        img.crossOrigin = "anonymous";
-        // 첫 6개 카드는 eager (above the fold), 나머지는 lazy
-        img.loading = (elGrid.children.length < 6) ? "eager" : "lazy";
-        if (img.loading === "eager") img.fetchPriority = "high";
         img.onerror = () => {
           // 이미지 깨지면 모노그램으로 폴백
           thumb.innerHTML = "";
@@ -390,7 +520,6 @@ ${list}${specContext}`;
           thumb.appendChild(fb);
         };
         thumb.appendChild(img);
-        img.src = p.imageUrl;
       } else {
         const fb = document.createElement("div");
         fb.className = "thumb-fallback";
