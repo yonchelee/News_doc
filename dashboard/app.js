@@ -374,10 +374,13 @@ ${list}${specContext}`;
       thumb.className = "thumb";
       if (p.imageUrl){
         const img = document.createElement("img");
-        img.src = p.imageUrl;
         img.alt = p.model;
-        img.loading = "lazy";
         img.referrerPolicy = "no-referrer";
+        img.decoding = "async";
+        img.crossOrigin = "anonymous";
+        // 첫 6개 카드는 eager (above the fold), 나머지는 lazy
+        img.loading = (elGrid.children.length < 6) ? "eager" : "lazy";
+        if (img.loading === "eager") img.fetchPriority = "high";
         img.onerror = () => {
           // 이미지 깨지면 모노그램으로 폴백
           thumb.innerHTML = "";
@@ -387,6 +390,7 @@ ${list}${specContext}`;
           thumb.appendChild(fb);
         };
         thumb.appendChild(img);
+        img.src = p.imageUrl;
       } else {
         const fb = document.createElement("div");
         fb.className = "thumb-fallback";
