@@ -148,11 +148,32 @@
   // Cloudflare Worker proxy URL (외부 환경)
   const WORKER_URL = (window.NEWS_DOC_WORKER_URL) || "https://news-doc-llm-proxy.yonchelee.workers.dev";
 
-  // 사내 환경 자동 감지 — 호스트네임이 *.sec.samsung.net 이면 Gauss 백엔드 사용
-  // override: window.NEWS_DOC_BACKEND_URL = "http://10.253.4.90:8000"
-  const IS_INTERNAL = /\.sec\.samsung\.net$/i.test(location.hostname);
-  const BACKEND_URL = (window.NEWS_DOC_BACKEND_URL) ||
-    (IS_INTERNAL ? "http://10.253.4.90:8000" : "");
+  // 사내/단일서버 환경 자동 감지
+  //
+  // 우선순위:
+  //  1. window.NEWS_DOC_BACKEND_URL 명시적 override
+  //  2. /health 가 same-origin에 있으면 (FastAPI가 대시보드 + API 같이 서빙) → "" (relative URL 사용)
+  //     → /chat 호출은 same-origin POST → CORS 무관, mixed content 무관
+  //  3. 호스트네임이 *.sec.samsung.net (사내 GHE Pages) → http://10.253.4.90:8000 (cross-origin)
+  //  4. 그 외 → "" (외부망 → 다른 엔진들로 폴백)
+  const IS_INTERNAL_HOST = /\.sec\.samsung\.net$/i.test(location.hostname);
+  const IS_LIKELY_SAME_ORIGIN_BACKEND =
+    /^10\.253\./.test(location.hostname) ||         // 사내 IP
+    location.hostname === "localhost" ||             // 로컬 개발
+    location.hostname === "127.0.0.1" ||
+    /^192\.168\./.test(location.hostname) ||         // 사설망
+    /^10\./.test(location.hostname);
+
+  let BACKEND_URL;
+  if (window.NEWS_DOC_BACKEND_URL) {
+    BACKEND_URL = window.NEWS_DOC_BACKEND_URL;
+  } else if (IS_LIKELY_SAME_ORIGIN_BACKEND) {
+    BACKEND_URL = "";   // same-origin → relative
+  } else if (IS_INTERNAL_HOST) {
+    BACKEND_URL = "http://10.253.4.90:8000";
+  } else {
+    BACKEND_URL = "";
+  }
 
   const AI = {
     engine: null,                 // "backend" | "worker" | "ollama" | "groq" | "gemini" | "fallback"
@@ -189,9 +210,18 @@
   }
 
   async function probeBackend(){
-    if (!BACKEND_URL) return false;
+    // BACKEND_URL이 빈 문자열일 수 있음 (same-origin) — 그래도 /health 시도
+    // 단, 외부망에선 same-origin이 GitHub Pages라 /health 없음 → 자연스럽게 fail
+    const isSameOrigin = !BACKEND_URL;
+    const isInternalHost = /\.sec\.samsung\.net$/i.test(location.hostname) ||
+                           /^10\.|^192\.168\./.test(location.hostname) ||
+                           location.hostname === "localhost" ||
+                           location.hostname === "127.0.0.1";
+    // 외부망 + same-origin이면 백엔드 시도 X (불필요한 404)
+    if (isSameOrigin && !isInternalHost) return false;
+
     try{
-      const r = await fetch(BACKEND_URL + "/health", { method: "GET" });
+      const r = await fetch((BACKEND_URL || "") + "/health", { method: "GET" });
       if (r.ok){
         const d = await r.json();
         if (d && d.ok){ AI.backendOk = true; return true; }
@@ -263,7 +293,7 @@ ${list}${specContext}`;
 
   // ---- 사내 Gauss 백엔드 (FastAPI proxy on 10.253.4.90:8000) ----
   async function callBackend(userQ){
-    const r = await fetch(BACKEND_URL + "/chat", {
+    const r = await fetch((BACKEND_URL || "") + "/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

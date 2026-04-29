@@ -1,6 +1,14 @@
-# 사내 Gauss 프록시 백엔드 — 셋업 가이드 (Windows)
+# 사내 Gauss 프록시 + 대시보드 호스팅 (Windows)
 
-영채님 PC(`10.253.4.90:8000`)가 사내 동료들이 News_doc 대시보드에서 Gauss LLM에 접근하는 단일 게이트웨이입니다. Gauss whitelist된 IP가 영채님 PC뿐이라, 다른 사람들은 이 프록시를 거쳐 호출하게 됩니다.
+영채님 PC가 **단일 서버**입니다 — FastAPI가 대시보드 정적 파일과 Gauss API 프록시를 동시에 서빙. Gauss whitelist된 IP가 영채님 PC뿐이라, 동료들은 영채님 PC에 직접 접속합니다.
+
+## 동료 접속 URL
+
+```
+http://10.253.4.90:8000/
+```
+
+→ 자동으로 `/dashboard/`로 redirect → 대시보드 표시. 별도 GHE Pages 없이도 동작.
 
 ## 사전 조건
 

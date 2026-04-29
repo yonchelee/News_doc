@@ -19,12 +19,14 @@
 import os
 import sys
 import logging
+from pathlib import Path
 from typing import Any, Dict
 
 import httpx
 from fastapi import FastAPI, Request, HTTPException, Header
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import JSONResponse, Response, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 
 # ---------- 설정 ----------
@@ -56,7 +58,11 @@ logging.basicConfig(
 )
 log = logging.getLogger("proxy")
 
-app = FastAPI(title="News_doc Gauss Proxy", version="1.0.0")
+# proxy.py 위치 기준 절대경로로 dashboard 폴더 찾기 (cwd 영향 없음)
+HERE = Path(__file__).resolve().parent
+DASHBOARD_DIR = HERE.parent / "dashboard"
+
+app = FastAPI(title="News_doc Gauss Proxy", version="1.1.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -71,18 +77,26 @@ app.add_middleware(
 
 # ---------- 엔드포인트 ----------
 @app.get("/")
-async def root() -> Dict[str, Any]:
-    return {
-        "ok": True,
-        "service": "news-doc-gauss-proxy",
-        "configured": bool(GAUSS_TOKEN and GAUSS_CLIENT),
-        "endpoint": GAUSS_URL,
-    }
+async def root() -> RedirectResponse:
+    """루트 접속 → 대시보드로 자동 이동."""
+    return RedirectResponse(url="/dashboard/", status_code=307)
 
 
 @app.get("/health")
 async def health() -> Dict[str, Any]:
     return {"ok": True}
+
+
+@app.get("/info")
+async def info() -> Dict[str, Any]:
+    """기존 / 가 dashboard로 redirect 되니, 서비스 메타는 /info에서."""
+    return {
+        "ok": True,
+        "service": "news-doc-gauss-proxy",
+        "configured": bool(GAUSS_TOKEN and GAUSS_CLIENT),
+        "endpoint": GAUSS_URL,
+        "dashboard_path": str(DASHBOARD_DIR) if DASHBOARD_DIR.exists() else "(not mounted)",
+    }
 
 
 @app.post("/chat")
@@ -153,6 +167,19 @@ async def debug() -> Dict[str, Any]:
         "extraOriginsCount": len(DEFAULT_ORIGINS),
         "proxyAuthEnabled": bool(PROXY_API_KEY),
     }
+
+
+# ---------- 정적 파일 (대시보드) 마운트 ----------
+# 동료들이 http://10.253.4.90:8000/ 로 직접 접속 → /dashboard/ 로 리다이렉트
+if DASHBOARD_DIR.exists():
+    app.mount(
+        "/dashboard",
+        StaticFiles(directory=str(DASHBOARD_DIR), html=True),
+        name="dashboard",
+    )
+    log.info("Dashboard mounted at /dashboard from %s", DASHBOARD_DIR)
+else:
+    log.warning("Dashboard 폴더 없음: %s — 정적 서빙 비활성화", DASHBOARD_DIR)
 
 
 if __name__ == "__main__":
