@@ -145,9 +145,14 @@
   function lsGet(k){ try{ return localStorage.getItem(k) || ""; }catch(e){ return ""; } }
   function lsSet(k,v){ try{ if (v) localStorage.setItem(k,v); else localStorage.removeItem(k); }catch(e){} }
 
+  // Cloudflare Worker proxy URL (Groq 백엔드, 키 노출 X)
+  // 사용자 Cloudflare 계정 서브도메인. 실제 다르면 setting에서 override 가능.
+  const WORKER_URL = (window.NEWS_DOC_WORKER_URL) || "https://news-doc-llm-proxy.yonchelee.workers.dev";
+
   const AI = {
-    engine: null,                 // "ollama" | "groq" | "gemini" | "fallback"
-    ollamaModel: null
+    engine: null,                 // "worker" | "ollama" | "groq" | "gemini" | "fallback"
+    ollamaModel: null,
+    workerOk: false
   };
 
   async function probeOllama(){
@@ -169,10 +174,22 @@
   }
 
   function pickEngine(){
-    if (AI.ollamaModel) return "ollama";
+    if (AI.workerOk)           return "worker";   // Cloudflare Worker 우선
+    if (AI.ollamaModel)        return "ollama";
     if (lsGet(STORAGE.groq))   return "groq";
     if (lsGet(STORAGE.gemini)) return "gemini";
     return "fallback";
+  }
+
+  async function probeWorker(){
+    try{
+      const r = await fetch(WORKER_URL + "/", { method: "GET" });
+      if (r.ok){
+        const d = await r.json();
+        if (d && d.ok){ AI.workerOk = true; return true; }
+      }
+    }catch(e){ /* worker 미배포/네트워크 — silent */ }
+    return false;
   }
 
   function buildSystemPrompt(userQ){
@@ -220,6 +237,28 @@
 
 제품 목록:
 ${list}${specContext}`;
+  }
+
+  // ---- Cloudflare Worker (Groq backend) ----
+  async function callWorker(userQ){
+    const r = await fetch(WORKER_URL + "/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        messages: [
+          { role: "system", content: buildSystemPrompt(userQ) },
+          { role: "user",   content: userQ }
+        ],
+        temperature: 0.3
+      })
+    });
+    if (!r.ok){
+      const errText = await r.text().catch(() => "");
+      throw new Error("worker " + r.status + " " + errText.slice(0,120));
+    }
+    const d = await r.json();
+    return (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || "";
   }
 
   // ---- Ollama ----
@@ -416,7 +455,8 @@ ${list}${specContext}`;
     AI.engine = engine;
     let raw, source;
     try{
-      if (engine === "ollama"){ raw = await callOllama(userQ); source = `Ollama · ${AI.ollamaModel}`; }
+      if (engine === "worker"){ raw = await callWorker(userQ); source = "Cloudflare Worker · Groq llama-3.3-70b"; }
+      else if (engine === "ollama"){ raw = await callOllama(userQ); source = `Ollama · ${AI.ollamaModel}`; }
       else if (engine === "groq"){ raw = await callGroq(userQ); source = "Groq · llama-3.3-70b"; }
       else if (engine === "gemini"){ raw = await callGemini(userQ); source = "Gemini 2.0 Flash"; }
       else throw new Error("no engine");
@@ -888,7 +928,8 @@ ${list}${specContext}`;
   function reflectEngine(){
     const e = pickEngine();
     AI.engine = e;
-    if (e === "ollama"){ setAiStatus("online", `Ollama · ${AI.ollamaModel}`); elAiEng.textContent = `Ollama · ${AI.ollamaModel}`; }
+    if (e === "worker"){ setAiStatus("online", "Worker · Groq"); elAiEng.textContent = "Cloudflare Worker · Groq llama-3.3-70b"; }
+    else if (e === "ollama"){ setAiStatus("online", `Ollama · ${AI.ollamaModel}`); elAiEng.textContent = `Ollama · ${AI.ollamaModel}`; }
     else if (e === "groq"){   setAiStatus("online", "Groq llama-3.3");   elAiEng.textContent = "Groq · llama-3.3-70b"; }
     else if (e === "gemini"){ setAiStatus("online", "Gemini 2.0 Flash"); elAiEng.textContent = "Gemini 2.0 Flash"; }
     else { setAiStatus("offline", "키워드 폴백"); elAiEng.textContent = "키워드 매칭"; }
@@ -900,7 +941,8 @@ ${list}${specContext}`;
   renderAiPanel({});
   setAiStatus("checking", "연결 확인 중");
   if (typeof fetch === "function"){
-    probeOllama().then(() => reflectEngine());
+    // Worker 우선 probe (제일 가능성 높은 엔진), 실패 시 Ollama 시도
+    Promise.all([probeWorker(), probeOllama()]).then(() => reflectEngine());
   } else {
     reflectEngine();
   }
