@@ -1,11 +1,5 @@
 /**
  * Cloudflare Worker — Groq LLM proxy for News_doc dashboard
- *
- * 단일 엔드포인트: POST /chat
- * - request body: OpenAI-호환 chat completions 페이로드 (Groq forward)
- * - GROQ_API_KEY 는 Worker secret 으로 보관 (클라이언트 노출 X)
- * - CORS: yonchelee.github.io + localhost(개발용) 만 허용
- * - 응답: Groq 응답 그대로 forward
  */
 
 interface Env {
@@ -21,7 +15,6 @@ const ALLOWED_ORIGINS = new Set<string>([
 ]);
 
 function corsHeaders(origin: string | null): HeadersInit {
-  // origin이 허용 목록이면 그 값을 echo, 아니면 빈 헤더 (브라우저가 막음)
   const allow = origin && ALLOWED_ORIGINS.has(origin) ? origin : "";
   return {
     "Access-Control-Allow-Origin": allow,
@@ -49,17 +42,25 @@ export default {
     const url = new URL(req.url);
     const origin = req.headers.get("Origin");
 
-    // Preflight
     if (req.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: corsHeaders(origin) });
     }
 
-    // Health check
     if (req.method === "GET" && url.pathname === "/") {
       return json({ ok: true, service: "news-doc-llm-proxy" }, { origin });
     }
 
-    // Origin 검사 — 외부에서 직접 호출 차단 (CORS와 별개로 서버에서도 거부)
+    // 진단용: 키 메타 (값 노출 X, prefix와 length만)
+    if (req.method === "GET" && url.pathname === "/_debug" && origin && ALLOWED_ORIGINS.has(origin)) {
+      const k = (env.GROQ_API_KEY || "").trim();
+      return json({
+        keyPresent: k.length > 0,
+        keyLength: k.length,
+        keyPrefix: k.slice(0, 4),
+        keyHasWhitespace: k !== env.GROQ_API_KEY,
+      }, { origin });
+    }
+
     if (!origin || !ALLOWED_ORIGINS.has(origin)) {
       return json({ error: "Forbidden: origin not allowed" }, { status: 403, origin });
     }
@@ -68,7 +69,8 @@ export default {
       return json({ error: "Not found" }, { status: 404, origin });
     }
 
-    if (!env.GROQ_API_KEY) {
+    const apiKey = (env.GROQ_API_KEY || "").trim();
+    if (!apiKey) {
       return json({ error: "Worker secret GROQ_API_KEY not configured" }, { status: 500, origin });
     }
 
@@ -79,11 +81,9 @@ export default {
       return json({ error: "Invalid JSON body" }, { status: 400, origin });
     }
 
-    // 기본 모델 강제 (요청에 model 없으면)
     if (!payload.model) {
       payload.model = "llama-3.3-70b-versatile";
     }
-    // Streaming 비활성화 (간단화)
     payload.stream = false;
 
     const groqUrl = "https://api.groq.com/openai/v1/chat/completions";
@@ -92,8 +92,9 @@ export default {
       upstream = await fetch(groqUrl, {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${env.GROQ_API_KEY}`,
+          "Authorization": `Bearer ${apiKey}`,
           "Content-Type": "application/json",
+          "User-Agent": "news-doc-llm-proxy/1.0",
         },
         body: JSON.stringify(payload),
       });
@@ -107,6 +108,8 @@ export default {
       headers: {
         "Content-Type": upstream.headers.get("Content-Type") || "application/json",
         ...corsHeaders(origin),
+        // 디버그: 업스트림 status를 헤더로 노출 (값 그대로)
+        "X-Upstream-Status": String(upstream.status),
       },
     });
   },
