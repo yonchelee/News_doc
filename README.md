@@ -78,15 +78,34 @@ Apple Minimalism — 화이트 BG, 1px hairline divider, `#F5F5F7` surface, gene
 
 ## 데이터
 
-- 소스: `제조사 정보_검색용.pdf` (이 레포 루트)
+- 소스: `제조사 정보_검색용.pdf` (이 레포 루트) + Wikipedia infobox 자동 추출
 - 갱신 기준: 2024 출시 + 2025 출시 + 2026 발표/유출
-- 스펙은 발표 시점 대표값. 신규 모델 추가는 `dashboard/data.js` PRODUCTS 배열에 객체 추가:
+- 두 단계 데이터:
+  - **PRODUCTS** (`dashboard/data.js`) — 80개 제품의 카드용 메타 (제조사, 카테고리, 모델, 연도, status, highlight, imageUrl)
+  - **SPECS** (`dashboard/data.js`) — 풀 스펙 (디자인, 디스플레이, 프로세서, 메모리, 카메라, 배터리, 연결성, OS, 내구성, 가격). 비교 모달에서 카테고리별 collapsible 섹션으로 표시. LLM에 동적으로 컨텍스트 주입.
+- 신규 모델 추가는 `dashboard/data.js` PRODUCTS 배열에 객체 추가:
 
 ```js
-{ mfr: "samsung", category: "smartphone", model: "Galaxy S26", year: 2026, status: "rumored", highlight: "..." }
+{ mfr: "samsung", category: "smartphone", model: "Galaxy S27", year: 2027, status: "rumored",
+  highlight: "...", imageUrl: "https://upload.wikimedia.org/..." }
 ```
 
 `status`: `"released"` | `"announced"` | `"rumored"`
+
+### 자동 갱신
+
+매주 토요일 18:00 UTC (한국 일요일 새벽) GitHub Actions가 자동 실행:
+- `tools/fetch_specs.py` — Wikipedia infobox 파싱 → 우리 스키마로 매핑
+- `tools/merge_specs.js` — 기존 SPECS와 병합 (manual 데이터 우선, 빈 필드 채움)
+- 변경 있으면 자동 commit + push to main → Pages 자동 재배포
+
+수동 트리거: 레포 → Actions → "Refresh product specs from Wikipedia" → Run workflow
+
+### 이미지
+
+`dashboard/data.js` PRODUCTS의 `imageUrl` 필드는 Wikipedia/Commons thumbnail. 80개 중 60개 매핑됨 (75%). 누락된 제품은 카드/모달에서 제조사 모노그램(예: "OV", "AS")으로 자동 폴백.
+
+수동 추가/갱신: `tools/fetch_images.py` 재실행 또는 PRODUCTS 객체에 직접 imageUrl 박기.
 
 ## 파일 구조
 

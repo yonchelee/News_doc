@@ -103,24 +103,51 @@
     return "fallback";
   }
 
-  function buildSystemPrompt(){
+  function buildSystemPrompt(userQ){
     const list = PRODUCTS.map(p => {
       const m = MANUFACTURERS.find(x => x.key === p.mfr);
       return `- ${p.model} | ${m ? m.name : p.mfr} | ${p.category} | ${p.year} ${p.status === "rumored" ? "(예정)" : ""}`;
     }).join("\n");
+
+    // 사용자 질의에 매칭 가능성 높은 제품 → 풀 스펙을 LLM에 주입
+    let specContext = "";
+    if (typeof SPECS !== "undefined" && userQ) {
+      const candidates = scoreByQuery(userQ).slice(0, 4).map(x => x.p.model);
+      const specBlocks = candidates
+        .filter(name => SPECS[name])
+        .map(name => {
+          const s = SPECS[name];
+          // 핵심 필드만 압축해서 토큰 절약
+          const flat = [
+            s.display && s.display.size && `display: ${s.display.size} ${s.display.panel || ""} ${s.display.refreshRate || ""}`,
+            s.processor && s.processor.ap && `chip: ${s.processor.ap}`,
+            s.memory && s.memory.ram && `ram: ${s.memory.ram}`,
+            s.camera && s.camera.rear && `cam: ${typeof s.camera.rear === 'object' ? Object.values(s.camera.rear).filter(Boolean).join('/') : s.camera.rear}`,
+            s.battery && s.battery.capacity && `battery: ${s.battery.capacity} ${s.battery.chargingWired || ""}`,
+            s.os && s.os.initial && `os: ${s.os.initial}`,
+            s.price && (s.price.usd || s.price.krw) && `price: ${s.price.usd || s.price.krw}`,
+            s.price && s.price.launchDate && `launch: ${s.price.launchDate}`
+          ].filter(Boolean).join(" | ");
+          return `[${name}] ${flat}`;
+        });
+      if (specBlocks.length) {
+        specContext = `\n\n관련 풀 스펙 (정확한 답변에 활용):\n${specBlocks.join("\n")}`;
+      }
+    }
+
     return `당신은 모바일 제품 데이터베이스 전문가입니다. 사용자 질문에 한국어로 친절하게 답하세요.
 
 답변 규칙:
-1. 짧고 명확하게 (3~6줄). 마크다운 사용 가능.
-2. 비교 질문이면 표 또는 두 단락으로 핵심 차이만.
+1. 짧고 명확하게 (3~8줄). 마크다운 사용 가능.
+2. 비교 질문이면 표 또는 두 단락으로 핵심 차이만 (스펙 수치 인용).
 3. 추천 질문이면 2~3개 후보 + 각 한 줄 이유.
 4. 제품명은 아래 목록에 있는 그대로 정확히 사용.
-5. 답변 끝에 별도 줄로 "MATCH:" 다음에 콤마 구분된 매칭 제품명 목록을 출력. (UI가 카드를 필터하는 데 사용)
+5. 답변 끝에 별도 줄로 "MATCH:" 다음에 콤마 구분된 매칭 제품명 목록을 출력.
    예: MATCH: Galaxy Z Fold7, iPhone 17 Pro Max
 6. 매칭이 없으면 MATCH: (빈칸)
 
 제품 목록:
-${list}`;
+${list}${specContext}`;
   }
 
   // ---- Ollama ----
@@ -132,7 +159,7 @@ ${list}`;
         model: AI.ollamaModel,
         stream: false,
         messages: [
-          { role: "system", content: buildSystemPrompt() },
+          { role: "system", content: buildSystemPrompt(userQ) },
           { role: "user",   content: userQ }
         ],
         options: { temperature: 0.3 }
@@ -152,7 +179,7 @@ ${list}`;
       body: JSON.stringify({
         model: "llama-3.3-70b-versatile",
         messages: [
-          { role: "system", content: buildSystemPrompt() },
+          { role: "system", content: buildSystemPrompt(userQ) },
           { role: "user",   content: userQ }
         ],
         temperature: 0.3
@@ -172,7 +199,7 @@ ${list}`;
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ role: "user", parts: [{ text: userQ }] }],
-        systemInstruction: { parts: [{ text: buildSystemPrompt() }] },
+        systemInstruction: { parts: [{ text: buildSystemPrompt(userQ) }] },
         generationConfig: { temperature: 0.3 }
       })
     });
@@ -342,6 +369,32 @@ ${list}`;
       card.setAttribute("aria-pressed", isPicked ? "true" : "false");
       card.dataset.model = p.model;
 
+      // 썸네일 (이미지 또는 모노그램 폴백)
+      const thumb = document.createElement("div");
+      thumb.className = "thumb";
+      if (p.imageUrl){
+        const img = document.createElement("img");
+        img.src = p.imageUrl;
+        img.alt = p.model;
+        img.loading = "lazy";
+        img.referrerPolicy = "no-referrer";
+        img.onerror = () => {
+          // 이미지 깨지면 모노그램으로 폴백
+          thumb.innerHTML = "";
+          const fb = document.createElement("div");
+          fb.className = "thumb-fallback";
+          fb.textContent = monogram(m.name);
+          thumb.appendChild(fb);
+        };
+        thumb.appendChild(img);
+      } else {
+        const fb = document.createElement("div");
+        fb.className = "thumb-fallback";
+        fb.textContent = monogram(m.name);
+        thumb.appendChild(fb);
+      }
+      card.appendChild(thumb);
+
       const meta = document.createElement("div");
       meta.className = "meta";
       const badge = document.createElement("span");
@@ -416,27 +469,100 @@ ${list}`;
     openCompare();
   });
 
+  // 비교 모달의 풀 스펙 섹션 정의
+  const SPEC_SECTIONS = [
+    { key: "design",       label: "디자인",     fields: [["dimensions","치수"],["weight","무게"],["materials","소재"],["colors","색상"]] },
+    { key: "display",      label: "디스플레이", fields: [["size","크기"],["resolution","해상도"],["panel","패널"],["refreshRate","주사율"],["brightness","밝기"],["hdr","HDR"],["extra","기타"]] },
+    { key: "processor",    label: "프로세서",   fields: [["ap","AP / 칩"],["process","공정"]] },
+    { key: "memory",       label: "메모리",     fields: [["ram","RAM"],["storage","저장"]] },
+    { key: "camera",       label: "카메라",     fields: [["rear","후면"],["front","전면"],["video","동영상"]] },
+    { key: "battery",      label: "배터리",     fields: [["capacity","용량"],["chargingWired","유선 충전"],["chargingWireless","무선 충전"],["reverse","역충전"]] },
+    { key: "connectivity", label: "연결성",     fields: [["fiveG","5G"],["wifi","Wi-Fi"],["bluetooth","Bluetooth"],["usb","USB"],["nfc","NFC"],["uwb","UWB"]] },
+    { key: "os",           label: "소프트웨어", fields: [["initial","초기 OS"],["updates","업데이트"]] },
+    { key: "durability",   label: "내구성",     fields: [["ip","방수방진"],["biometric","생체인식"]] },
+    { key: "price",        label: "가격 / 출시", fields: [["krw","한국 가격"],["usd","USD 가격"],["launchDate","출시일"]] }
+  ];
+
+  function fmtSpecValue(v) {
+    if (v === undefined || v === null || v === "") return null;
+    if (Array.isArray(v)) return v.join(" · ");
+    if (typeof v === "boolean") return v ? "✓ 지원" : "✗ 미지원";
+    if (typeof v === "object") {
+      // camera.rear { main, ultrawide, ... } 같은 중첩
+      return Object.entries(v).filter(([k,vv]) => vv).map(([k, vv]) => `${k}: ${vv}`).join(" · ");
+    }
+    return String(v);
+  }
+
+  function specRows(specA, specB, sectionKey, fields) {
+    const sa = (specA && specA[sectionKey]) || {};
+    const sb = (specB && specB[sectionKey]) || {};
+    const out = { aRows: [], bRows: [] };
+    fields.forEach(([key, label]) => {
+      const va = fmtSpecValue(sa[key]);
+      const vb = fmtSpecValue(sb[key]);
+      const diff = (va && vb && va !== vb);
+      out.aRows.push({ label, value: va || "—", diff });
+      out.bRows.push({ label, value: vb || "—", diff });
+    });
+    return out;
+  }
+
+  function buildSpecSections(p, otherSpecs, mySpecs) {
+    if (!mySpecs) {
+      return `<p class="cmp-source">스펙 데이터 없음 — <code>tools/fetch_specs.py</code> 또는 manual 추가 필요.</p>`;
+    }
+    const rows = SPEC_SECTIONS.map((sec, i) => {
+      const sa = (mySpecs && mySpecs[sec.key]) || {};
+      const sb = (otherSpecs && otherSpecs[sec.key]) || {};
+      const trs = sec.fields.map(([k, lbl]) => {
+        const va = fmtSpecValue(sa[k]);
+        const vb = fmtSpecValue(sb[k]);
+        if (va === null) return ""; // 빈 필드는 스킵
+        const diff = (va && vb && va !== vb);
+        return `<div class="cmp-row${diff?' diff':''}"><dt>${esc(lbl)}</dt><dd>${esc(va)}</dd></div>`;
+      }).filter(Boolean).join("");
+      if (!trs) return "";
+      return `<details class="cmp-section"${i < 2 ? " open" : ""}>
+        <summary>${esc(sec.label)}</summary>
+        <dl>${trs}</dl>
+      </details>`;
+    }).filter(Boolean).join("");
+    const src = mySpecs.source ? `<div class="cmp-source">출처: <a href="${esc(mySpecs.source)}" target="_blank" rel="noopener">Wikipedia</a> · 갱신: ${esc(mySpecs.lastUpdated || "—")}</div>` : "";
+    return rows + src;
+  }
+
   function openCompare(){
     const body = qs("#cmp-modal-body");
     body.innerHTML = "";
-    state.picks.forEach(model => {
-      const p = PRODUCTS.find(x => x.model === model);
+    const [mA, mB] = state.picks;
+    const pA = PRODUCTS.find(x => x.model === mA);
+    const pB = PRODUCTS.find(x => x.model === mB);
+    const specA = (typeof SPECS !== "undefined") ? SPECS[mA] : null;
+    const specB = (typeof SPECS !== "undefined") ? SPECS[mB] : null;
+
+    [[pA, specA, specB], [pB, specB, specA]].forEach(([p, mySpecs, otherSpecs]) => {
       if (!p) return;
       const m = MANUFACTURERS.find(x => x.key === p.mfr) || { name: p.mfr };
       const c = CATEGORIES.find(x => x.key === p.category) || { label: p.category };
       const col = document.createElement("section");
       col.className = "cmp-col";
-      col.innerHTML = `
-        <div class="meta"><span class="badge">${ICONS[p.category] || ""} ${esc(c.label)}</span></div>
+
+      // thumbnail
+      const thumb = `<div class="cmp-thumb">${
+        p.imageUrl
+          ? `<img src="${esc(p.imageUrl)}" alt="${esc(p.model)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentNode.innerHTML='<div class=&quot;thumb-fallback&quot;>${esc(monogram(m.name))}</div>'"/>`
+          : `<div class="thumb-fallback">${esc(monogram(m.name))}</div>`
+      }</div>`;
+
+      const head = `<div class="meta"><span class="badge">${ICONS[p.category] || ""} ${esc(c.label)}</span> · ${esc(m.name)} · ${esc(String(p.year))} ${p.status === "rumored" ? "(예정)" : ""}</div>
         <h3>${esc(p.model)}</h3>
-        <dl>
-          <div class="row"><dt>제조사</dt><dd>${esc(m.name)}</dd></div>
-          <div class="row"><dt>카테고리</dt><dd>${esc(c.label)}</dd></div>
-          <div class="row"><dt>출시</dt><dd>${esc(String(p.year || "-"))} · ${p.status === "rumored" ? "예정" : "출시"}</dd></div>
-          <div class="row"><dt>특징</dt><dd>${esc(p.highlight || "-")}</dd></div>
-        </dl>`;
+        <p class="hl">${esc(p.highlight || "")}</p>`;
+
+      col.innerHTML = thumb + head + buildSpecSections(p, otherSpecs, mySpecs);
       body.appendChild(col);
     });
+
     elModal.hidden = false;
     document.body.classList.add("modal-open");
   }
@@ -459,7 +585,7 @@ ${list}`;
     elAiLabel.textContent = label;
   }
 
-  function renderAiPanel({ body, source, loading, error }){
+  function renderAiPanel({ body, source, loading, error, matchModels }){
     const node = qs("#ai-body");
     elAiEng.textContent = source || "대기 중";
     if (loading){
@@ -490,7 +616,24 @@ ${list}`;
       });
       return;
     }
+    // 매칭된 제품들의 thumbnail 배지
+    let productBadges = "";
+    if (matchModels && matchModels.length){
+      const items = matchModels
+        .map(name => PRODUCTS.find(p => p.model === name))
+        .filter(Boolean)
+        .slice(0, 6)
+        .map(p => {
+          const m = MANUFACTURERS.find(x => x.key === p.mfr) || { name: p.mfr };
+          const img = p.imageUrl
+            ? `<img src="${esc(p.imageUrl)}" alt="${esc(p.model)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML='<span class=&quot;ai-pc-mono&quot;>${esc(monogram(m.name))}</span>'"/>`
+            : `<span class="ai-pc-mono">${esc(monogram(m.name))}</span>`;
+          return `<span class="ai-product-card">${img}<span>${esc(p.model)}</span></span>`;
+        }).join("");
+      if (items) productBadges = `<div class="ai-product-list">${items}</div>`;
+    }
     node.innerHTML = `<div class="ai-content">${markdownish(body)}</div>` +
+      productBadges +
       (source ? `<div class="ai-source">${esc(source)}</div>` : "");
   }
 
@@ -537,7 +680,7 @@ ${list}`;
     try{
       const res = await askAI(userQ);
       if (seq !== askInFlight) return;   // 더 새로운 질의가 들어옴 — 무시
-      renderAiPanel({ body: res.body, source: res.source });
+      renderAiPanel({ body: res.body, source: res.source, matchModels: res.matches });
 
       // AI가 매칭한 모델이 있으면 카드 그리드/비교 모드에 반영
       if (res.matches && res.matches.length){
