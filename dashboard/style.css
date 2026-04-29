@@ -347,6 +347,8 @@ body.modal-open{ overflow: hidden; }
   display:flex; align-items:center; justify-content:center;
   padding: 20px;
 }
+.cmp-modal[hidden]{ display: none; }
+.cmp-bar[hidden]{ display: none; }
 .cmp-modal-backdrop{
   position:absolute; inset:0;
   background: rgba(0,0,0,.32);
