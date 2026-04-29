@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400" role="img" aria-label="Orion (개발자 프로토타입) (Meta)">
+  <rect width="400" height="400" fill="#e7f0ff"/>
+  <!-- 상단 가는 액센트 라인 -->
+  <rect x="0" y="0" width="400" height="3" fill="#0866ff"/>
+  <!-- 카테고리 아이콘 — 중앙, 큰 사이즈 -->
+  <g transform="translate(100, 60) scale(1.0)" color="#0a2e85">
+    
+    <path d="M 30 80 Q 30 65 45 65 L 155 65 Q 170 65 170 80 L 170 120 Q 170 138 152 138 L 130 138 L 115 122 L 85 122 L 70 138 L 48 138 Q 30 138 30 120 Z"
+          fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+    <ellipse cx="70" cy="100" rx="14" ry="10" fill="currentColor" opacity="0.12"/>
+    <ellipse cx="130" cy="100" rx="14" ry="10" fill="currentColor" opacity="0.12"/>
+    <circle cx="70" cy="100" r="4" fill="currentColor"/>
+    <circle cx="130" cy="100" r="4" fill="currentColor"/>
+  
+  </g>
+  <!-- 카테고리 라벨 (작게, 상단 우측) -->
+  <text x="380" y="28" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Pretendard', system-ui, sans-serif"
+        font-size="11" font-weight="600" fill="#0866ff" letter-spacing="0.5" text-transform="uppercase">XR / 글래스</text>
+  <!-- 모델명 -->
+  <text x="200" y="300" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Pretendard', system-ui, sans-serif" font-size="19" font-weight="600" fill="#0a2e85" letter-spacing="-0.3">Orion (개발자 프로토타입)</text>
+  <!-- 제조사 + 연도 -->
+  <text x="200" y="336" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Pretendard', system-ui, sans-serif" font-size="12" fill="#0a2e85" opacity="0.6">Meta · 2024 (발표)</text>
+</svg>

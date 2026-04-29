@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400" role="img" aria-label="Xiaomi MIX Flip 2 (Xiaomi)">
+  <rect width="400" height="400" fill="#fff4e6"/>
+  <!-- 상단 가는 액센트 라인 -->
+  <rect x="0" y="0" width="400" height="3" fill="#ff6900"/>
+  <!-- 카테고리 아이콘 — 중앙, 큰 사이즈 -->
+  <g transform="translate(100, 60) scale(1.0)" color="#5a2400">
+    
+    <rect x="40" y="50" width="55" height="100" rx="8" fill="none" stroke="currentColor" stroke-width="3"/>
+    <rect x="105" y="50" width="55" height="100" rx="8" fill="none" stroke="currentColor" stroke-width="3"/>
+    <rect x="48" y="58" width="39" height="84" rx="2" fill="currentColor" opacity="0.06"/>
+    <rect x="113" y="58" width="39" height="84" rx="2" fill="currentColor" opacity="0.06"/>
+  
+  </g>
+  <!-- 카테고리 라벨 (작게, 상단 우측) -->
+  <text x="380" y="28" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Pretendard', system-ui, sans-serif"
+        font-size="11" font-weight="600" fill="#ff6900" letter-spacing="0.5" text-transform="uppercase">폴더블</text>
+  <!-- 모델명 -->
+  <text x="200" y="300" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Pretendard', system-ui, sans-serif" font-size="19" font-weight="600" fill="#5a2400" letter-spacing="-0.3">Xiaomi MIX Flip 2</text>
+  <!-- 제조사 + 연도 -->
+  <text x="200" y="336" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Pretendard', system-ui, sans-serif" font-size="12" fill="#5a2400" opacity="0.6">Xiaomi · 2025</text>
+</svg>

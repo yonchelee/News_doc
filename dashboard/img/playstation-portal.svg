@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400" role="img" aria-label="PlayStation Portal (Sony)">
+  <rect width="400" height="400" fill="#f0f0f3"/>
+  <!-- 상단 가는 액센트 라인 -->
+  <rect x="0" y="0" width="400" height="3" fill="#000000"/>
+  <!-- 카테고리 아이콘 — 중앙, 큰 사이즈 -->
+  <g transform="translate(100, 60) scale(1.0)" color="#0a0a14">
+    
+    <path d="M 35 90 L 50 75 Q 60 65 75 65 L 125 65 Q 140 65 150 75 L 165 90 Q 175 105 175 120 L 175 130 Q 175 150 158 150 Q 145 150 138 138 L 130 125 L 70 125 L 62 138 Q 55 150 42 150 Q 25 150 25 130 L 25 120 Q 25 105 35 90 Z"
+          fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+    <line x1="55" y1="100" x2="75" y2="100" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+    <line x1="65" y1="90" x2="65" y2="110" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="125" cy="95" r="4" fill="currentColor"/>
+    <circle cx="140" cy="105" r="4" fill="currentColor"/>
+  
+  </g>
+  <!-- 카테고리 라벨 (작게, 상단 우측) -->
+  <text x="380" y="28" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Pretendard', system-ui, sans-serif"
+        font-size="11" font-weight="600" fill="#000000" letter-spacing="0.5" text-transform="uppercase">게이밍</text>
+  <!-- 모델명 -->
+  <text x="200" y="300" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Pretendard', system-ui, sans-serif" font-size="19" font-weight="600" fill="#0a0a14" letter-spacing="-0.3">PlayStation Portal</text>
+  <!-- 제조사 + 연도 -->
+  <text x="200" y="336" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Pretendard', system-ui, sans-serif" font-size="12" fill="#0a0a14" opacity="0.6">Sony · 2023</text>
+</svg>

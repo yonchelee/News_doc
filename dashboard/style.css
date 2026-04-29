@@ -169,25 +169,31 @@ body.modal-open{ overflow: hidden; }
   padding: 18px;
   transition: transform var(--t), box-shadow var(--t), background var(--t);
 }
+/* 카드 thumbnail 컨테이너 — 모든 제품 동일한 정사각 박스, 흰 배경, contain, 패딩 */
 .card .thumb{
-  width: 100%; aspect-ratio: 16 / 10;
+  width: 100%; aspect-ratio: 1 / 1;
   margin: -2px 0 12px;
-  background: var(--bg);
+  background: #ffffff;
   border-radius: 12px;
   overflow: hidden;
   display: flex; align-items: center; justify-content: center;
   border: 1px solid var(--line);
 }
+@media (prefers-color-scheme: dark){
+  .card .thumb{ background: #ffffff; }   /* 다크모드에서도 제품 배경은 항상 흰색 (시각 일관성) */
+}
 .card .thumb img{
   width: 100%; height: 100%;
   object-fit: contain;
-  background: var(--bg);
-  padding: 6px;
+  background: transparent;
+  padding: 0;   /* SVG 자체에 패딩 내장됨 */
 }
 .card .thumb-fallback{
   display: flex; align-items: center; justify-content: center;
-  font-size: 32px; font-weight: 700;
+  width: 100%; height: 100%;
+  font-size: 36px; font-weight: 700;
   color: var(--ink-2); letter-spacing: -.02em;
+  background: #ffffff;
 }
 .card:hover{ transform: translateY(-2px); box-shadow: var(--shadow); background: var(--bg); }
 .card .meta{
@@ -412,12 +418,12 @@ body.modal-open{ overflow: hidden; }
 .cmp-col .cmp-thumb{
   width: 100%; aspect-ratio: 1 / 1;
   margin: -4px 0 14px;
-  background: var(--bg); border-radius: 14px; overflow: hidden;
+  background: #ffffff; border-radius: 14px; overflow: hidden;
   display: flex; align-items: center; justify-content: center;
   border: 1px solid var(--line);
 }
 .cmp-col .cmp-thumb img{
-  width: 100%; height: 100%; object-fit: contain; padding: 14px; background: var(--bg);
+  width: 100%; height: 100%; object-fit: contain; padding: 0; background: transparent;
 }
 .cmp-col h3{ margin: 0 0 8px; font-size: 18px; font-weight:600; letter-spacing:-.01em; }
 .cmp-col .meta{ font-size:11.5px; color:var(--ink-2); margin-bottom: 4px; }
