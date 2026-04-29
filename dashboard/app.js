@@ -145,14 +145,20 @@
   function lsGet(k){ try{ return localStorage.getItem(k) || ""; }catch(e){ return ""; } }
   function lsSet(k,v){ try{ if (v) localStorage.setItem(k,v); else localStorage.removeItem(k); }catch(e){} }
 
-  // Cloudflare Worker proxy URL (Groq 백엔드, 키 노출 X)
-  // 사용자 Cloudflare 계정 서브도메인. 실제 다르면 setting에서 override 가능.
+  // Cloudflare Worker proxy URL (외부 환경)
   const WORKER_URL = (window.NEWS_DOC_WORKER_URL) || "https://news-doc-llm-proxy.yonchelee.workers.dev";
 
+  // 사내 환경 자동 감지 — 호스트네임이 *.sec.samsung.net 이면 Gauss 백엔드 사용
+  // override: window.NEWS_DOC_BACKEND_URL = "http://10.253.4.90:8000"
+  const IS_INTERNAL = /\.sec\.samsung\.net$/i.test(location.hostname);
+  const BACKEND_URL = (window.NEWS_DOC_BACKEND_URL) ||
+    (IS_INTERNAL ? "http://10.253.4.90:8000" : "");
+
   const AI = {
-    engine: null,                 // "worker" | "ollama" | "groq" | "gemini" | "fallback"
+    engine: null,                 // "backend" | "worker" | "ollama" | "groq" | "gemini" | "fallback"
     ollamaModel: null,
-    workerOk: false
+    workerOk: false,
+    backendOk: false
   };
 
   async function probeOllama(){
@@ -174,11 +180,24 @@
   }
 
   function pickEngine(){
-    if (AI.workerOk)           return "worker";   // Cloudflare Worker 우선
+    if (AI.backendOk)          return "backend";  // 사내 Gauss 백엔드 최우선
+    if (AI.workerOk)           return "worker";   // Cloudflare Worker
     if (AI.ollamaModel)        return "ollama";
     if (lsGet(STORAGE.groq))   return "groq";
     if (lsGet(STORAGE.gemini)) return "gemini";
     return "fallback";
+  }
+
+  async function probeBackend(){
+    if (!BACKEND_URL) return false;
+    try{
+      const r = await fetch(BACKEND_URL + "/health", { method: "GET" });
+      if (r.ok){
+        const d = await r.json();
+        if (d && d.ok){ AI.backendOk = true; return true; }
+      }
+    }catch(e){ /* 백엔드 안 켜짐/네트워크 — silent */ }
+    return false;
   }
 
   async function probeWorker(){
@@ -240,6 +259,39 @@
 
 제품 목록:
 ${list}${specContext}`;
+  }
+
+  // ---- 사내 Gauss 백엔드 (FastAPI proxy on 10.253.4.90:8000) ----
+  async function callBackend(userQ){
+    const r = await fetch(BACKEND_URL + "/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        messages: [
+          { role: "system", content: buildSystemPrompt(userQ) },
+          { role: "user",   content: userQ }
+        ],
+        temperature: 0.3
+      })
+    });
+    if (!r.ok){
+      const errText = await r.text().catch(() => "");
+      throw new Error("backend " + r.status + " " + errText.slice(0,150));
+    }
+    const d = await r.json();
+    // OpenAI 호환 응답 우선, 아니면 raw
+    if (d && d.choices && d.choices[0] && d.choices[0].message){
+      return d.choices[0].message.content || "";
+    }
+    // Gauss 응답 형식 미상 — 흔한 필드 시도
+    if (typeof d === "string") return d;
+    if (d && d.content) return d.content;
+    if (d && d.message) return typeof d.message === "string" ? d.message : (d.message.content || "");
+    if (d && d.answer) return d.answer;
+    if (d && d.response) return d.response;
+    if (d && d.text) return d.text;
+    // 폴백: JSON 그대로 표시 (사용자가 형식 보고 수정 가능)
+    return "```json\n" + JSON.stringify(d, null, 2).slice(0, 2000) + "\n```";
   }
 
   // ---- Cloudflare Worker (Groq backend) ----
@@ -461,7 +513,8 @@ ${list}${specContext}`;
     AI.engine = engine;
     let raw, source;
     try{
-      if (engine === "worker"){ raw = await callWorker(userQ); source = "Cloudflare Worker · Groq llama-3.3-70b"; }
+      if (engine === "backend"){ raw = await callBackend(userQ); source = "사내 Gauss 백엔드 (10.253.4.90)"; }
+      else if (engine === "worker"){ raw = await callWorker(userQ); source = "Cloudflare Worker · Groq llama-3.3-70b"; }
       else if (engine === "ollama"){ raw = await callOllama(userQ); source = `Ollama · ${AI.ollamaModel}`; }
       else if (engine === "groq"){ raw = await callGroq(userQ); source = "Groq · llama-3.3-70b"; }
       else if (engine === "gemini"){ raw = await callGemini(userQ); source = "Gemini 2.0 Flash"; }
@@ -1051,7 +1104,8 @@ ${list}${specContext}`;
   function reflectEngine(){
     const e = pickEngine();
     AI.engine = e;
-    if (e === "worker"){ setAiStatus("online", "Worker · Groq"); elAiEng.textContent = "Cloudflare Worker · Groq llama-3.3-70b"; }
+    if (e === "backend"){ setAiStatus("online", "사내 Gauss"); elAiEng.textContent = "사내 Gauss 백엔드 (10.253.4.90)"; }
+    else if (e === "worker"){ setAiStatus("online", "Worker · Groq"); elAiEng.textContent = "Cloudflare Worker · Groq llama-3.3-70b"; }
     else if (e === "ollama"){ setAiStatus("online", `Ollama · ${AI.ollamaModel}`); elAiEng.textContent = `Ollama · ${AI.ollamaModel}`; }
     else if (e === "groq"){   setAiStatus("online", "Groq llama-3.3");   elAiEng.textContent = "Groq · llama-3.3-70b"; }
     else if (e === "gemini"){ setAiStatus("online", "Gemini 2.0 Flash"); elAiEng.textContent = "Gemini 2.0 Flash"; }
@@ -1064,8 +1118,8 @@ ${list}${specContext}`;
   renderAiPanel({});
   setAiStatus("checking", "연결 확인 중");
   if (typeof fetch === "function"){
-    // Worker 우선 probe (제일 가능성 높은 엔진), 실패 시 Ollama 시도
-    Promise.all([probeWorker(), probeOllama()]).then(() => reflectEngine());
+    // 사내 백엔드 → Worker → Ollama 순으로 probe
+    Promise.all([probeBackend(), probeWorker(), probeOllama()]).then(() => reflectEngine());
   } else {
     reflectEngine();
   }
