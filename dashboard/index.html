@@ -15,6 +15,21 @@
   <p class="lede">10개 글로벌 제조사의 핵심 라인업을 한 화면에서.</p>
 </header>
 
+<section class="ai">
+  <label class="ai-field">
+    <span class="visually-hidden">AI 검색</span>
+    <span class="ai-icon" aria-hidden="true">✦</span>
+    <input id="ai-q" type="text" autocomplete="off"
+           placeholder="AI로 찾기 — 예: 5G 폴더블 추천, 아이폰이랑 갤럭시 비교" />
+    <span class="ai-status" id="ai-status" aria-live="polite" title="LLM 연결 상태">
+      <span class="ai-dot" data-state="checking"></span>
+      <span class="ai-status-label">연결 확인 중</span>
+    </span>
+    <button type="button" id="ai-go" class="ai-go" aria-label="AI 검색 실행">→</button>
+  </label>
+  <p class="ai-hint" id="ai-hint">Ollama가 켜져 있으면 자연어로 질문할 수 있어요. 꺼져 있으면 키워드 매칭 모드로 동작합니다.</p>
+</section>
+
 <section class="search">
   <label class="search-field">
     <span class="visually-hidden">검색</span>
@@ -44,6 +59,32 @@
 <footer class="foot">
   <p>출처: 제조사 정보_검색용.pdf · 디자인: Apple Minimalism</p>
 </footer>
+
+<!-- ===== Comparison sticky bar ===== -->
+<aside class="cmp-bar" id="cmp-bar" hidden aria-label="비교 트레이">
+  <div class="cmp-inner">
+    <div class="cmp-slots">
+      <div class="cmp-slot" data-slot="0"><span class="cmp-slot-empty">슬롯 1</span></div>
+      <div class="cmp-slot" data-slot="1"><span class="cmp-slot-empty">슬롯 2</span></div>
+    </div>
+    <div class="cmp-actions">
+      <button type="button" id="cmp-clear" class="cmp-btn cmp-btn-ghost">비우기</button>
+      <button type="button" id="cmp-open"  class="cmp-btn cmp-btn-primary" disabled>비교하기</button>
+    </div>
+  </div>
+</aside>
+
+<!-- ===== Comparison modal ===== -->
+<div class="cmp-modal" id="cmp-modal" hidden role="dialog" aria-modal="true" aria-labelledby="cmp-modal-title">
+  <div class="cmp-modal-backdrop" data-close></div>
+  <div class="cmp-modal-card">
+    <header class="cmp-modal-head">
+      <h2 id="cmp-modal-title">제품 비교</h2>
+      <button type="button" class="cmp-close" data-close aria-label="닫기">×</button>
+    </header>
+    <div class="cmp-modal-body" id="cmp-modal-body"></div>
+  </div>
+</div>
 
 <script src="data.js"></script>
 <script src="app.js"></script>
