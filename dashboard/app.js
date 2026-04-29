@@ -201,7 +201,10 @@
     // 사용자 질의에 매칭 가능성 높은 제품 → 풀 스펙을 LLM에 주입
     let specContext = "";
     if (typeof SPECS !== "undefined" && userQ) {
-      const candidates = scoreByQuery(userQ).slice(0, 4).map(x => x.p.model);
+      // 비교 의도면 더 많이 (최대 8), 일반은 4
+      const isCompare = /비교|vs|versus|중에|차이|추천/i.test(userQ);
+      const limit = isCompare ? 8 : 4;
+      const candidates = scoreByQuery(userQ).slice(0, limit).map(x => x.p.model);
       const specBlocks = candidates
         .filter(name => SPECS[name])
         .map(name => {
@@ -369,57 +372,60 @@ ${list}${specContext}`;
     }).filter(x => x.score > 0).sort((a,b) => b.score - a.score);
   }
 
-  // 비교 패턴 분리: "이랑/랑/와/과 ... 비교" 또는 "vs" 같은 모든 변형 처리
+  // 비교 패턴 분리: N개도 처리 ("A vs B vs C" / "A, B, C 비교" 등)
   function splitComparePair(q){
-    // 우선 'vs' / 'versus' 로 명시적 split
-    let parts = q.split(/\s*(?:vs|VS|versus|Versus|VERSUS)\s*/).filter(Boolean);
+    // 'vs / versus / +' 로 split (N parts)
+    let parts = q.split(/\s*(?:vs|VS|versus|Versus|VERSUS|\+)\s*/).filter(Boolean);
     if (parts.length >= 2) return parts;
 
-    // "X 비교 Y" 형태
-    parts = q.split(/\s*비교\s*(?:해\s*달라|해줘|해|할|하|—)?\s*/).filter(Boolean);
-    if (parts.length >= 2) return parts;
-
-    // "X 이랑 Y", "X 랑 Y", "X 와 Y", "X 과 Y" — 단, 마지막에 "비교" 같은 게 와야 의도 확실
-    if (/비교|차이/.test(q)){
-      // 한국어 접속 조사로 split, 마지막 토큰의 "비교/차이/...해" 같은 꼬리는 제거
-      parts = q.split(/\s*(?:이랑|랑|와|과|또는)\s+/).filter(Boolean);
-      if (parts.length >= 2){
-        // 마지막 part에서 "비교해달라", "비교", "차이" 등 꼬리 제거
-        parts[parts.length - 1] = parts[parts.length - 1]
-          .replace(/\s*(?:비교\s*해\s*달라|비교\s*해\s*줘|비교\s*해|비교|차이|어때|뭐가\s*달라)\s*$/, "")
+    // "비교" 기준 split — 마지막 꼬리 제거
+    const splitAndClean = (re) => {
+      const ps = q.split(re).filter(Boolean);
+      if (ps.length >= 2){
+        ps[ps.length - 1] = ps[ps.length - 1]
+          .replace(/\s*(?:비교\s*해\s*달라|비교\s*해\s*줘|비교\s*해|비교|차이|어때|뭐가\s*달라|중에\s*추천)\s*$/, "")
           .trim();
-        return parts.filter(Boolean);
       }
+      return ps.filter(Boolean);
+    };
+
+    // "X 비교 Y" — 비교가 중간에
+    parts = splitAndClean(/\s*비교\s*(?:해\s*달라|해줘|해|할|하|—)?\s*/);
+    if (parts.length >= 2) return parts;
+
+    // "X 이랑 Y 이랑 Z 비교" 또는 "X, Y, Z 중에 추천" 같은 패턴
+    if (/비교|차이|중에|추천/.test(q)){
+      // 한국어 접속 조사 + 콤마/슬래시로 split
+      parts = splitAndClean(/\s*(?:이랑|랑|와|과|또는|,|\/)\s+/);
+      if (parts.length >= 2) return parts;
     }
     return [];
   }
 
   function keywordFallback(userQ){
-    const wantsCompare = /비교|vs|versus|둘\s*중|차이/i.test(userQ);
+    const wantsCompare = /비교|vs|versus|중에|차이|추천/i.test(userQ);
 
     let matches = [];
 
-    // 0) 정확 모델 힌트가 2개 이상 떨어졌으면 즉시 사용
+    // 0) 정확 모델 힌트가 N개 떨어졌으면 모두 사용 (N 제한 없음)
     if (wantsCompare){
       const hints = exactModelHints(userQ)
         .filter(h => PRODUCTS.some(p => p.model === h));
-      if (hints.length >= 2){
-        matches = [hints[0], hints[1]];
-      }
+      // 중복 제거
+      const seen = new Set();
+      hints.forEach(h => { if (!seen.has(h)) { seen.add(h); matches.push(h); } });
     }
 
-    // 1) 비교 패턴 → 양쪽 split 후 각각 scoreByQuery
-    if (matches.length < 2 && wantsCompare){
+    // 1) 비교 패턴 → N개 split 후 각각 scoreByQuery
+    if (wantsCompare){
       const parts = splitComparePair(userQ);
-      if (parts.length >= 2){
-        const left  = scoreByQuery(parts[0])[0];
-        const right = scoreByQuery(parts[1])[0];
-        if (left)  matches.push(left.p.model);
-        if (right && right.p.model !== (left && left.p.model)) matches.push(right.p.model);
-      }
+      parts.forEach(part => {
+        const top = scoreByQuery(part)[0];
+        if (top && matches.indexOf(top.p.model) === -1) matches.push(top.p.model);
+      });
     }
 
-    // 2) 그래도 부족하면 전체 쿼리 점수 기반 폴백
+    // 2) 비교인데 매칭 부족하면 (1개만) 전체 쿼리 점수로 보충해서 최소 2개
     if (wantsCompare && matches.length < 2){
       const all = scoreByQuery(userQ);
       for (const x of all){
@@ -615,30 +621,57 @@ ${list}${specContext}`;
     renderCmpBar();
   }
 
-  // ============ 비교 모드 ============
+  // ============ 비교 모드 (N개 제한 없음) ============
   function togglePick(model){
     const idx = state.picks.indexOf(model);
     if (idx !== -1) state.picks.splice(idx, 1);
-    else {
-      if (state.picks.length >= 2) state.picks.shift();
-      state.picks.push(model);
-    }
+    else state.picks.push(model);   // 제한 없음
     renderGrid();
   }
 
   function renderCmpBar(){
-    qsa(".cmp-slot").forEach((slot, i) => {
-      const model = state.picks[i];
-      slot.classList.toggle("filled", !!model);
-      slot.textContent = model || (i === 0 ? "슬롯 1 — 카드를 탭" : "슬롯 2");
+    const slotsContainer = qs(".cmp-slots");
+    if (!slotsContainer) return;
+    slotsContainer.innerHTML = "";
+    if (state.picks.length === 0){
+      elBar.hidden = true;
+      return;
+    }
+    elBar.hidden = false;
+
+    // 카운트 라벨 + 칩들
+    const count = document.createElement("span");
+    count.className = "cmp-count";
+    count.textContent = `비교: ${state.picks.length}개`;
+    slotsContainer.appendChild(count);
+
+    state.picks.forEach((model, i) => {
+      const chip = document.createElement("span");
+      chip.className = "cmp-chip";
+      const label = document.createElement("span");
+      label.className = "cmp-chip-label";
+      label.textContent = model;
+      const x = document.createElement("button");
+      x.type = "button";
+      x.className = "cmp-chip-x";
+      x.setAttribute("aria-label", `${model} 비교에서 제거`);
+      x.textContent = "×";
+      x.addEventListener("click", e => {
+        e.stopPropagation();
+        state.picks.splice(i, 1);
+        renderGrid();
+      });
+      chip.appendChild(label);
+      chip.appendChild(x);
+      slotsContainer.appendChild(chip);
     });
-    qs("#cmp-open").disabled = state.picks.length !== 2;
-    elBar.hidden = state.picks.length === 0;
+
+    qs("#cmp-open").disabled = state.picks.length < 2;
   }
 
   qs("#cmp-clear").addEventListener("click", () => { state.picks = []; renderGrid(); });
   qs("#cmp-open").addEventListener("click", () => {
-    if (state.picks.length !== 2) return;
+    if (state.picks.length < 2) return;
     openCompare();
   });
 
@@ -656,15 +689,28 @@ ${list}${specContext}`;
     { key: "price",        label: "가격 / 출시", fields: [["krw","한국 가격"],["usd","USD 가격"],["launchDate","출시일"]] }
   ];
 
+  function decodeHtmlEntities(s) {
+    if (!s || typeof s !== "string") return s;
+    return s
+      .replace(/&#160;|&nbsp;/g, " ")
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;|&apos;/g, "'")
+      .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n, 10)))
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
   function fmtSpecValue(v) {
     if (v === undefined || v === null || v === "") return null;
-    if (Array.isArray(v)) return v.join(" · ");
+    if (Array.isArray(v)) return v.map(x => decodeHtmlEntities(String(x))).join(" · ");
     if (typeof v === "boolean") return v ? "✓ 지원" : "✗ 미지원";
     if (typeof v === "object") {
-      // camera.rear { main, ultrawide, ... } 같은 중첩
-      return Object.entries(v).filter(([k,vv]) => vv).map(([k, vv]) => `${k}: ${vv}`).join(" · ");
+      return Object.entries(v).filter(([k,vv]) => vv).map(([k, vv]) => `${k}: ${decodeHtmlEntities(String(vv))}`).join(" · ");
     }
-    return String(v);
+    return decodeHtmlEntities(String(v));
   }
 
   function specRows(specA, specB, sectionKey, fields) {
@@ -708,32 +754,111 @@ ${list}${specContext}`;
   function openCompare(){
     const body = qs("#cmp-modal-body");
     body.innerHTML = "";
-    const [mA, mB] = state.picks;
-    const pA = PRODUCTS.find(x => x.model === mA);
-    const pB = PRODUCTS.find(x => x.model === mB);
-    const specA = (typeof SPECS !== "undefined") ? SPECS[mA] : null;
-    const specB = (typeof SPECS !== "undefined") ? SPECS[mB] : null;
+    if (state.picks.length < 2) return;
 
-    [[pA, specA, specB], [pB, specB, specA]].forEach(([p, mySpecs, otherSpecs]) => {
-      if (!p) return;
+    const products = state.picks
+      .map(name => PRODUCTS.find(p => p.model === name))
+      .filter(Boolean);
+    const specsList = products.map(p => (typeof SPECS !== "undefined") ? (SPECS[p.model] || {}) : {});
+
+    // ---- 테이블 컨테이너 ----
+    const wrap = document.createElement("div");
+    wrap.className = "cmp-table-wrap";
+
+    const table = document.createElement("table");
+    table.className = "cmp-table";
+
+    // ---- 컬럼 헤더 (제품 카드) ----
+    const thead = document.createElement("thead");
+    const trHead = document.createElement("tr");
+    const thLabel = document.createElement("th");
+    thLabel.className = "cmp-th-label";
+    thLabel.textContent = "";
+    trHead.appendChild(thLabel);
+
+    products.forEach((p, idx) => {
       const m = MANUFACTURERS.find(x => x.key === p.mfr) || { name: p.mfr };
       const c = CATEGORIES.find(x => x.key === p.category) || { label: p.category };
-      const col = document.createElement("section");
-      col.className = "cmp-col";
-
-      // thumbnail
-      const thumb = `<div class="cmp-thumb">${
-        p.imageUrl
-          ? `<img src="${esc(p.imageUrl)}" alt="${esc(p.model)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentNode.innerHTML='<div class=&quot;thumb-fallback&quot;>${esc(monogram(m.name))}</div>'"/>`
-          : `<div class="thumb-fallback">${esc(monogram(m.name))}</div>`
-      }</div>`;
-
-      const head = `<div class="meta"><span class="badge">${ICONS[p.category] || ""} ${esc(c.label)}</span> · ${esc(m.name)} · ${esc(String(p.year))} ${p.status === "rumored" ? "(예정)" : ""}</div>
+      const th = document.createElement("th");
+      th.className = "cmp-th-product";
+      th.innerHTML = `
+        <button type="button" class="cmp-th-x" aria-label="${esc(p.model)} 제거" data-remove="${esc(p.model)}">×</button>
+        <div class="cmp-thumb-mini">${
+          p.imageUrl
+            ? `<img src="${esc(p.imageUrl)}" alt="${esc(p.model)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentNode.innerHTML='<div class=&quot;thumb-fallback&quot;>${esc(monogram(m.name))}</div>'"/>`
+            : `<div class="thumb-fallback">${esc(monogram(m.name))}</div>`
+        }</div>
         <h3>${esc(p.model)}</h3>
-        <p class="hl">${esc(p.highlight || "")}</p>`;
+        <p class="cmp-th-meta">${esc(m.name)} · ${esc(String(p.year))}${p.status === "rumored" ? " (예정)" : ""}</p>
+      `;
+      trHead.appendChild(th);
+    });
+    thead.appendChild(trHead);
+    table.appendChild(thead);
 
-      col.innerHTML = thumb + head + buildSpecSections(p, otherSpecs, mySpecs);
-      body.appendChild(col);
+    // ---- 본문: 카테고리별 섹션 ----
+    const tbody = document.createElement("tbody");
+    SPEC_SECTIONS.forEach(sec => {
+      // 섹션 헤더 행
+      const trSec = document.createElement("tr");
+      trSec.className = "cmp-sec-header";
+      const tdSec = document.createElement("td");
+      tdSec.colSpan = products.length + 1;
+      tdSec.textContent = sec.label;
+      trSec.appendChild(tdSec);
+      let hasRow = false;
+      const sectionRows = document.createDocumentFragment();
+      sec.fields.forEach(([k, lbl]) => {
+        const values = specsList.map(s => fmtSpecValue((s[sec.key] || {})[k]));
+        if (!values.some(v => v && v !== "—")) return;   // 모두 빈 필드 → 스킵
+        hasRow = true;
+        const tr = document.createElement("tr");
+        const labelTd = document.createElement("td");
+        labelTd.className = "cmp-row-label";
+        labelTd.textContent = lbl;
+        tr.appendChild(labelTd);
+        // 차이 강조: 모두 같지 않으면 .diff
+        const setVals = new Set(values.map(v => v || ""));
+        const allSame = setVals.size === 1;
+        if (!allSame) tr.classList.add("diff");
+        values.forEach(v => {
+          const td = document.createElement("td");
+          td.className = "cmp-row-val";
+          td.textContent = v || "—";
+          tr.appendChild(td);
+        });
+        sectionRows.appendChild(tr);
+      });
+      if (hasRow){
+        tbody.appendChild(trSec);
+        tbody.appendChild(sectionRows);
+      }
+    });
+    table.appendChild(tbody);
+    wrap.appendChild(table);
+    body.appendChild(wrap);
+
+    // 출처 푸터 (모든 SPECS source의 unique 목록)
+    const sources = [...new Set(specsList.map(s => s.source).filter(Boolean))];
+    if (sources.length){
+      const foot = document.createElement("div");
+      foot.className = "cmp-table-foot";
+      foot.innerHTML = `출처: ${sources.map(u => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(u.replace(/^https?:\/\//,"").slice(0,40))}</a>`).join(" · ")}`;
+      body.appendChild(foot);
+    }
+
+    // 컬럼 헤더 X 버튼 핸들러
+    body.querySelectorAll("[data-remove]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const model = btn.getAttribute("data-remove");
+        const idx = state.picks.indexOf(model);
+        if (idx !== -1){
+          state.picks.splice(idx, 1);
+          renderGrid();
+          if (state.picks.length >= 2) openCompare();
+          else closeModal(elModal);
+        }
+      });
     });
 
     elModal.hidden = false;
@@ -855,19 +980,17 @@ ${list}${specContext}`;
       if (seq !== askInFlight) return;   // 더 새로운 질의가 들어옴 — 무시
       renderAiPanel({ body: res.body, source: res.source, matchModels: res.matches });
 
-      // AI가 매칭한 모델이 있으면 카드 그리드/비교 모드에 반영
+      // AI가 매칭한 모델이 있으면 카드 그리드/비교 모드에 반영 (N 제한 없음)
       if (res.matches && res.matches.length){
         const valid = res.matches.filter(name => PRODUCTS.some(p => p.model === name));
-        if (valid.length >= 2 && /비교|vs|versus|둘\s*중|차이/.test(userQ)){
-          // 비교 패턴 → 두 카드 선택 + 모달 자동 오픈
-          state.picks = valid.slice(0, 2);
+        if (valid.length >= 2 && /비교|vs|versus|중에|차이|추천/.test(userQ)){
+          // 비교/추천 패턴 → 매칭된 N개 모두 선택 + 모달 자동 오픈
+          state.picks = valid.slice();   // 전체 — 제한 없음
           renderGrid();
           openCompare();
         } else if (valid.length === 1){
-          // 단일 매칭 → 검색창에 모델명 적용해 그 카드만 강조
           state.q = valid[0]; elAsk.value = valid[0]; renderGrid();
         }
-        // 다수 매칭이지만 비교 의도 아니면 패널 텍스트만 유지 (필터는 키워드 검색이 이미 수행)
       }
     }catch(e){
       if (seq !== askInFlight) return;
