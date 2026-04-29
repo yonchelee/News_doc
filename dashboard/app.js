@@ -539,18 +539,19 @@ ${list}`;
       if (seq !== askInFlight) return;   // 더 새로운 질의가 들어옴 — 무시
       renderAiPanel({ body: res.body, source: res.source });
 
-      // AI가 매칭한 모델이 있으면 카드 그리드에서 그 모델만 보이도록 검색창에 첫 매칭 적용
+      // AI가 매칭한 모델이 있으면 카드 그리드/비교 모드에 반영
       if (res.matches && res.matches.length){
         const valid = res.matches.filter(name => PRODUCTS.some(p => p.model === name));
-        if (valid.length === 1){
+        if (valid.length >= 2 && /비교|vs|versus|둘\s*중|차이/.test(userQ)){
+          // 비교 패턴 → 두 카드 선택 + 모달 자동 오픈
+          state.picks = valid.slice(0, 2);
+          renderGrid();
+          openCompare();
+        } else if (valid.length === 1){
+          // 단일 매칭 → 검색창에 모델명 적용해 그 카드만 강조
           state.q = valid[0]; elAsk.value = valid[0]; renderGrid();
-        } else if (valid.length >= 2){
-          // 두 개 이상 → 비교 모드 자동 트리거 (단, 유저 패턴이 비교일 때만)
-          if (/비교|vs|versus|둘\s*중|차이/.test(userQ)){
-            state.picks = valid.slice(0,2);
-            renderGrid();
-          }
         }
+        // 다수 매칭이지만 비교 의도 아니면 패널 텍스트만 유지 (필터는 키워드 검색이 이미 수행)
       }
     }catch(e){
       if (seq !== askInFlight) return;
