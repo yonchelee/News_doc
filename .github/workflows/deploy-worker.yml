@@ -14,6 +14,9 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    # Worker secret 업로드용 env는 job 레벨에서 노출 (wrangler-action이 안정적으로 픽업)
+    env:
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
     steps:
       - uses: actions/checkout@v4
 
@@ -29,7 +32,6 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: worker
           command: deploy
+          wranglerVersion: "4"
           secrets: |
             GROQ_API_KEY
-        env:
-          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
