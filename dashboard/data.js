@@ -28,65 +28,65 @@ const MANUFACTURERS = [
 // imageUrl 누락 시 카드는 SVG 아이콘 + 모노그램으로 폴백
 const PRODUCTS = [
   // ========== 1. Apple ==========
-  { mfr: "apple", category: "smartphone", model: "iPhone 17 Pro Max", year: 2025, status: "released", highlight: "A19 Pro · 6.9\" LTPO · 새 카메라 plateau", imageUrl: "img/iphone-17-pro-max.svg" },
-  { mfr: "apple", category: "smartphone", model: "iPhone 17 Pro", year: 2025, status: "released", highlight: "A19 Pro · 6.3\" 120Hz · 티타늄 → 알루미늄 회귀", imageUrl: "img/iphone-17-pro.svg" },
-  { mfr: "apple", category: "smartphone", model: "iPhone 17", year: 2025, status: "released", highlight: "A19 · 6.3\" ProMotion 120Hz 기본 탑재", imageUrl: "img/iphone-17.svg" },
-  { mfr: "apple", category: "smartphone", model: "iPhone Air", year: 2025, status: "released", highlight: "초슬림 · A19 · eSIM 전용 · iPhone Plus 대체", imageUrl: "img/iphone-air.svg" },
-  { mfr: "apple", category: "smartphone", model: "iPhone 16 Pro Max", year: 2024, status: "released", highlight: "A18 Pro · 6.9\" · Camera Control 버튼", imageUrl: "img/iphone-16-pro-max.svg" },
-  { mfr: "apple", category: "smartphone", model: "iPhone 16", year: 2024, status: "released", highlight: "A18 · Action Button · Apple Intelligence", imageUrl: "img/iphone-16.svg" },
-  { mfr: "apple", category: "smartphone", model: "iPhone 16e", year: 2025, status: "released", highlight: "보급형 · A18 · 자체 5G 모뎀(C1)", imageUrl: "img/iphone-16e.svg" },
-  { mfr: "apple", category: "tablet", model: "iPad Pro M5", year: 2025, status: "released", highlight: "M5 · Tandem OLED · 더 강력한 NPU", imageUrl: "img/ipad-pro-m5.svg" },
+  { mfr: "apple", category: "smartphone", model: "iPhone 17 Pro Max", year: 2025, status: "released", highlight: "A19 Pro · 6.9\" LTPO · 새 카메라 plateau", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/IPhone_17_Pro_Vector.svg/500px-IPhone_17_Pro_Vector.svg.png" },
+  { mfr: "apple", category: "smartphone", model: "iPhone 17 Pro", year: 2025, status: "released", highlight: "A19 Pro · 6.3\" 120Hz · 티타늄 → 알루미늄 회귀", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/IPhone_17_Pro_Vector.svg/500px-IPhone_17_Pro_Vector.svg.png" },
+  { mfr: "apple", category: "smartphone", model: "iPhone 17", year: 2025, status: "released", highlight: "A19 · 6.3\" ProMotion 120Hz 기본 탑재", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/IPhone_17_Vector.svg/500px-IPhone_17_Vector.svg.png" },
+  { mfr: "apple", category: "smartphone", model: "iPhone Air", year: 2025, status: "released", highlight: "초슬림 · A19 · eSIM 전용 · iPhone Plus 대체", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/IPhone_Air_Vector.svg/500px-IPhone_Air_Vector.svg.png" },
+  { mfr: "apple", category: "smartphone", model: "iPhone 16 Pro Max", year: 2024, status: "released", highlight: "A18 Pro · 6.9\" · Camera Control 버튼", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/IPhone_16_Pro_Vector.svg/500px-IPhone_16_Pro_Vector.svg.png" },
+  { mfr: "apple", category: "smartphone", model: "iPhone 16", year: 2024, status: "released", highlight: "A18 · Action Button · Apple Intelligence", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/IPhone_16_Vector.svg/500px-IPhone_16_Vector.svg.png" },
+  { mfr: "apple", category: "smartphone", model: "iPhone 16e", year: 2025, status: "released", highlight: "보급형 · A18 · 자체 5G 모뎀(C1)", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/IPhone_16e_Vector.svg/500px-IPhone_16e_Vector.svg.png" },
+  { mfr: "apple", category: "tablet", model: "iPad Pro M5", year: 2025, status: "released", highlight: "M5 · Tandem OLED · 더 강력한 NPU", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/11-inch_iPad_Pro_M5_with_Apple_Pencil_Pro.jpg/500px-11-inch_iPad_Pro_M5_with_Apple_Pencil_Pro.jpg" },
   { mfr: "apple", category: "tablet", model: "iPad Air M3", year: 2025, status: "released", highlight: "M3 · 11/13\" · Center Stage 강화", imageUrl: "img/ipad-air-m3.svg" },
-  { mfr: "apple", category: "tablet", model: "iPad mini A17 Pro", year: 2024, status: "released", highlight: "8.3\" · Apple Intelligence 지원", imageUrl: "img/ipad-mini-a17-pro.svg" },
-  { mfr: "apple", category: "wearable", model: "Apple Watch Ultra 3", year: 2025, status: "released", highlight: "위성 통신 · 5G · 더 큰 디스플레이", imageUrl: "img/apple-watch-ultra-3.svg" },
-  { mfr: "apple", category: "wearable", model: "Apple Watch Series 11", year: 2025, status: "released", highlight: "S11 · 혈압 추세 · 5G eSIM", imageUrl: "img/apple-watch-series-11.svg" },
-  { mfr: "apple", category: "wearable", model: "Apple Watch SE 3", year: 2025, status: "released", highlight: "보급형 · 항상 켜짐 디스플레이 추가", imageUrl: "img/apple-watch-se-3.svg" },
-  { mfr: "apple", category: "xr", model: "Vision Pro M5", year: 2025, status: "released", highlight: "M5 칩 · visionOS 26 · Air-puff 헤드밴드", imageUrl: "img/vision-pro-m5.svg" },
-  { mfr: "apple", category: "xr", model: "Vision Pro 2", year: 2026, status: "rumored", highlight: "더 가벼움 · 가격 인하 · 공급 확대 예정", imageUrl: "img/vision-pro-2.svg" },
+  { mfr: "apple", category: "tablet", model: "iPad mini A17 Pro", year: 2024, status: "released", highlight: "8.3\" · Apple Intelligence 지원", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/IPad_Mini.png/500px-IPad_Mini.png" },
+  { mfr: "apple", category: "wearable", model: "Apple Watch Ultra 3", year: 2025, status: "released", highlight: "위성 통신 · 5G · 더 큰 디스플레이", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Apple_Watch_Series_10.jpg/500px-Apple_Watch_Series_10.jpg" },
+  { mfr: "apple", category: "wearable", model: "Apple Watch Series 11", year: 2025, status: "released", highlight: "S11 · 혈압 추세 · 5G eSIM", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Apple_Watch_Series_10.jpg/500px-Apple_Watch_Series_10.jpg" },
+  { mfr: "apple", category: "wearable", model: "Apple Watch SE 3", year: 2025, status: "released", highlight: "보급형 · 항상 켜짐 디스플레이 추가", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Apple_Watch_Series_10.jpg/500px-Apple_Watch_Series_10.jpg" },
+  { mfr: "apple", category: "xr", model: "Vision Pro M5", year: 2025, status: "released", highlight: "M5 칩 · visionOS 26 · Air-puff 헤드밴드", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Apple_Vision_Pro_with_Solo_Knit_Band.jpg/500px-Apple_Vision_Pro_with_Solo_Knit_Band.jpg" },
+  { mfr: "apple", category: "xr", model: "Vision Pro 2", year: 2026, status: "rumored", highlight: "더 가벼움 · 가격 인하 · 공급 확대 예정", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Apple_Vision_Pro_with_Solo_Knit_Band.jpg/500px-Apple_Vision_Pro_with_Solo_Knit_Band.jpg" },
 
   // ========== 2. Samsung ==========
-  { mfr: "samsung", category: "smartphone", model: "Galaxy S25 Ultra", year: 2025, status: "released", highlight: "SD8 Elite · 200MP · 7-step Galaxy AI", imageUrl: "img/galaxy-s25-ultra.svg" },
-  { mfr: "samsung", category: "smartphone", model: "Galaxy S25+", year: 2025, status: "released", highlight: "6.7\" QHD+ · 4900mAh · S Pen 미지원", imageUrl: "img/galaxy-s25-plus.svg" },
-  { mfr: "samsung", category: "smartphone", model: "Galaxy S25", year: 2025, status: "released", highlight: "6.2\" · SD8 Elite · 컴팩트 플래그십", imageUrl: "img/galaxy-s25.svg" },
-  { mfr: "samsung", category: "smartphone", model: "Galaxy S25 Edge", year: 2025, status: "released", highlight: "초슬림 5.8mm · 티타늄 프레임", imageUrl: "img/galaxy-s25-edge.svg" },
-  { mfr: "samsung", category: "smartphone", model: "Galaxy S26 Ultra", year: 2026, status: "released", highlight: "SD8 Elite Gen5 · 6.9\" 2600nit · Privacy Display · 알루미늄 회귀", imageUrl: "img/galaxy-s26-ultra.svg" },
-  { mfr: "samsung", category: "foldable", model: "Galaxy Z Fold7", year: 2025, status: "released", highlight: "8\" 내부 · 215g · 더 얇아진 힌지", imageUrl: "img/galaxy-z-fold7.svg" },
-  { mfr: "samsung", category: "foldable", model: "Galaxy Z Flip7", year: 2025, status: "released", highlight: "4.1\" 외부 풀스크린 · Exynos 2500", imageUrl: "img/galaxy-z-flip7.svg" },
-  { mfr: "samsung", category: "foldable", model: "Galaxy Z Fold6", year: 2024, status: "released", highlight: "7.6\" 내부 · IPX8 · DeX", imageUrl: "img/galaxy-z-fold6.svg" },
-  { mfr: "samsung", category: "foldable", model: "Galaxy Z Flip6", year: 2024, status: "released", highlight: "FlexWindow 3.4\" · 50MP · 4000mAh", imageUrl: "img/galaxy-z-flip6.svg" },
-  { mfr: "samsung", category: "tablet", model: "Galaxy Tab S11 Ultra", year: 2025, status: "released", highlight: "14.6\" AMOLED · Dimensity 9400+", imageUrl: "img/galaxy-tab-s11-ultra.svg" },
-  { mfr: "samsung", category: "tablet", model: "Galaxy Tab S10 Ultra", year: 2024, status: "released", highlight: "14.6\" · S Pen 포함", imageUrl: "img/galaxy-tab-s10-ultra.svg" },
+  { mfr: "samsung", category: "smartphone", model: "Galaxy S25 Ultra", year: 2025, status: "released", highlight: "SD8 Elite · 200MP · 7-step Galaxy AI", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/%E7%AC%AC%E4%B8%80%E6%89%8B%EF%BC%81Samsung_Galaxy_S25%E7%B3%BB%E5%88%97%E6%8B%BF%E5%88%B0%E4%BA%86%EF%BC%9A5%E4%B8%AA%E5%8D%87%E7%BA%A7%EF%BC%81S_Pen%E4%B8%8D%E6%94%AF%E6%8C%81%E8%93%9D%E7%89%99%E4%BA%86%EF%BC%9F_%282160p_50fps_VP9-96kbit_AAC%29-00.00.07.100.png/500px-%E7%AC%AC%E4%B8%80%E6%89%8B%EF%BC%81Samsung_Galaxy_S25%E7%B3%BB%E5%88%97%E6%8B%BF%E5%88%B0%E4%BA%86%EF%BC%9A5%E4%B8%AA%E5%8D%87%E7%BA%A7%EF%BC%81S_Pen%E4%B8%8D%E6%94%AF%E6%8C%81%E8%93%9D%E7%89%99%E4%BA%86%EF%BC%9F_%282160p_50fps_VP9-96kbit_AAC%29-00.00.07.100.png" },
+  { mfr: "samsung", category: "smartphone", model: "Galaxy S25+", year: 2025, status: "released", highlight: "6.7\" QHD+ · 4900mAh · S Pen 미지원", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/%E7%AC%AC%E4%B8%80%E6%89%8B%EF%BC%81Samsung_Galaxy_S25%E7%B3%BB%E5%88%97%E6%8B%BF%E5%88%B0%E4%BA%86%EF%BC%9A5%E4%B8%AA%E5%8D%87%E7%BA%A7%EF%BC%81S_Pen%E4%B8%8D%E6%94%AF%E6%8C%81%E8%93%9D%E7%89%99%E4%BA%86%EF%BC%9F_%282160p_50fps_VP9-96kbit_AAC%29-00.00.07.100.png/500px-%E7%AC%AC%E4%B8%80%E6%89%8B%EF%BC%81Samsung_Galaxy_S25%E7%B3%BB%E5%88%97%E6%8B%BF%E5%88%B0%E4%BA%86%EF%BC%9A5%E4%B8%AA%E5%8D%87%E7%BA%A7%EF%BC%81S_Pen%E4%B8%8D%E6%94%AF%E6%8C%81%E8%93%9D%E7%89%99%E4%BA%86%EF%BC%9F_%282160p_50fps_VP9-96kbit_AAC%29-00.00.07.100.png" },
+  { mfr: "samsung", category: "smartphone", model: "Galaxy S25", year: 2025, status: "released", highlight: "6.2\" · SD8 Elite · 컴팩트 플래그십", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/%E7%AC%AC%E4%B8%80%E6%89%8B%EF%BC%81Samsung_Galaxy_S25%E7%B3%BB%E5%88%97%E6%8B%BF%E5%88%B0%E4%BA%86%EF%BC%9A5%E4%B8%AA%E5%8D%87%E7%BA%A7%EF%BC%81S_Pen%E4%B8%8D%E6%94%AF%E6%8C%81%E8%93%9D%E7%89%99%E4%BA%86%EF%BC%9F_%282160p_50fps_VP9-96kbit_AAC%29-00.00.07.100.png/500px-%E7%AC%AC%E4%B8%80%E6%89%8B%EF%BC%81Samsung_Galaxy_S25%E7%B3%BB%E5%88%97%E6%8B%BF%E5%88%B0%E4%BA%86%EF%BC%9A5%E4%B8%AA%E5%8D%87%E7%BA%A7%EF%BC%81S_Pen%E4%B8%8D%E6%94%AF%E6%8C%81%E8%93%9D%E7%89%99%E4%BA%86%EF%BC%9F_%282160p_50fps_VP9-96kbit_AAC%29-00.00.07.100.png" },
+  { mfr: "samsung", category: "smartphone", model: "Galaxy S25 Edge", year: 2025, status: "released", highlight: "초슬림 5.8mm · 티타늄 프레임", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/%E7%AC%AC%E4%B8%80%E6%89%8B%EF%BC%81Samsung_Galaxy_S25%E7%B3%BB%E5%88%97%E6%8B%BF%E5%88%B0%E4%BA%86%EF%BC%9A5%E4%B8%AA%E5%8D%87%E7%BA%A7%EF%BC%81S_Pen%E4%B8%8D%E6%94%AF%E6%8C%81%E8%93%9D%E7%89%99%E4%BA%86%EF%BC%9F_%282160p_50fps_VP9-96kbit_AAC%29-00.00.07.100.png/500px-%E7%AC%AC%E4%B8%80%E6%89%8B%EF%BC%81Samsung_Galaxy_S25%E7%B3%BB%E5%88%97%E6%8B%BF%E5%88%B0%E4%BA%86%EF%BC%9A5%E4%B8%AA%E5%8D%87%E7%BA%A7%EF%BC%81S_Pen%E4%B8%8D%E6%94%AF%E6%8C%81%E8%93%9D%E7%89%99%E4%BA%86%EF%BC%9F_%282160p_50fps_VP9-96kbit_AAC%29-00.00.07.100.png" },
+  { mfr: "samsung", category: "smartphone", model: "Galaxy S26 Ultra", year: 2026, status: "released", highlight: "SD8 Elite Gen5 · 6.9\" 2600nit · Privacy Display · 알루미늄 회귀", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/20260227_%EC%82%BC%EC%84%B1_%EA%B0%A4%EB%9F%AD%EC%8B%9C_S26_%EC%8B%9C%EB%A6%AC%EC%A6%88.jpg/500px-20260227_%EC%82%BC%EC%84%B1_%EA%B0%A4%EB%9F%AD%EC%8B%9C_S26_%EC%8B%9C%EB%A6%AC%EC%A6%88.jpg" },
+  { mfr: "samsung", category: "foldable", model: "Galaxy Z Fold7", year: 2025, status: "released", highlight: "8\" 내부 · 215g · 더 얇아진 힌지", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Samsung_Galaxy_Z_Fold_7_and_Z_Flip_7.jpg/500px-Samsung_Galaxy_Z_Fold_7_and_Z_Flip_7.jpg" },
+  { mfr: "samsung", category: "foldable", model: "Galaxy Z Flip7", year: 2025, status: "released", highlight: "4.1\" 외부 풀스크린 · Exynos 2500", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Samsung_Galaxy_Z_Fold_7_and_Z_Flip_7.jpg/500px-Samsung_Galaxy_Z_Fold_7_and_Z_Flip_7.jpg" },
+  { mfr: "samsung", category: "foldable", model: "Galaxy Z Fold6", year: 2024, status: "released", highlight: "7.6\" 내부 · IPX8 · DeX", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/Samsung_Galaxy_Z_Fold6.png/500px-Samsung_Galaxy_Z_Fold6.png" },
+  { mfr: "samsung", category: "foldable", model: "Galaxy Z Flip6", year: 2024, status: "released", highlight: "FlexWindow 3.4\" · 50MP · 4000mAh", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Samsung_Galaxy_Z_Fold_7_and_Z_Flip_7.jpg/500px-Samsung_Galaxy_Z_Fold_7_and_Z_Flip_7.jpg" },
+  { mfr: "samsung", category: "tablet", model: "Galaxy Tab S11 Ultra", year: 2025, status: "released", highlight: "14.6\" AMOLED · Dimensity 9400+", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Imgi-17-samsung-galaxy-tab-s11-ultra-galaxy-ai-scaled.webp/500px-Imgi-17-samsung-galaxy-tab-s11-ultra-galaxy-ai-scaled.webp.png" },
+  { mfr: "samsung", category: "tablet", model: "Galaxy Tab S10 Ultra", year: 2024, status: "released", highlight: "14.6\" · S Pen 포함", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Samsung_Galaxy_Tab_S10_Ultra.jpg/500px-Samsung_Galaxy_Tab_S10_Ultra.jpg" },
   { mfr: "samsung", category: "wearable", model: "Galaxy Watch8", year: 2025, status: "released", highlight: "Exynos W1000 · Antioxidant 측정", imageUrl: "img/galaxy-watch8.svg" },
-  { mfr: "samsung", category: "wearable", model: "Galaxy Watch Ultra (2025)", year: 2025, status: "released", highlight: "47mm · 다이빙 · 듀얼 시스템", imageUrl: "img/galaxy-watch-ultra-2025.svg" },
-  { mfr: "samsung", category: "wearable", model: "Galaxy Ring", year: 2024, status: "released", highlight: "수면/심박 · 7일 배터리 · 9사이즈", imageUrl: "img/galaxy-ring.svg" },
+  { mfr: "samsung", category: "wearable", model: "Galaxy Watch Ultra (2025)", year: 2025, status: "released", highlight: "47mm · 다이빙 · 듀얼 시스템", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Samsung_Galaxy_Watch.jpg/500px-Samsung_Galaxy_Watch.jpg" },
+  { mfr: "samsung", category: "wearable", model: "Galaxy Ring", year: 2024, status: "released", highlight: "수면/심박 · 7일 배터리 · 9사이즈", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Galaxy_Ring.jpg/500px-Galaxy_Ring.jpg" },
 
   // ========== 3. Xiaomi ==========
-  { mfr: "xiaomi", category: "smartphone", model: "Xiaomi 15 Ultra", year: 2025, status: "released", highlight: "SD8 Elite · Leica 1\" 메인 센서", imageUrl: "img/xiaomi-15-ultra.svg" },
-  { mfr: "xiaomi", category: "smartphone", model: "Xiaomi 15 Pro", year: 2024, status: "released", highlight: "6.73\" 2K · 6100mAh · 90W 충전", imageUrl: "img/xiaomi-15-pro.svg" },
-  { mfr: "xiaomi", category: "smartphone", model: "Xiaomi 15", year: 2024, status: "released", highlight: "6.36\" LTPO · 컴팩트 플래그십", imageUrl: "img/xiaomi-15.svg" },
+  { mfr: "xiaomi", category: "smartphone", model: "Xiaomi 15 Ultra", year: 2025, status: "released", highlight: "SD8 Elite · Leica 1\" 메인 센서", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Xiaomi_15_Ultra_001.jpg/500px-Xiaomi_15_Ultra_001.jpg" },
+  { mfr: "xiaomi", category: "smartphone", model: "Xiaomi 15 Pro", year: 2024, status: "released", highlight: "6.73\" 2K · 6100mAh · 90W 충전", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Xiaomi_15_Ultra_001.jpg/500px-Xiaomi_15_Ultra_001.jpg" },
+  { mfr: "xiaomi", category: "smartphone", model: "Xiaomi 15", year: 2024, status: "released", highlight: "6.36\" LTPO · 컴팩트 플래그십", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Xiaomi_15_Ultra_001.jpg/500px-Xiaomi_15_Ultra_001.jpg" },
   { mfr: "xiaomi", category: "smartphone", model: "Xiaomi 16 Pro", year: 2025, status: "released", highlight: "SD8 Elite Gen2 · HyperOS 3", imageUrl: "img/xiaomi-16-pro.svg" },
   { mfr: "xiaomi", category: "foldable", model: "Xiaomi MIX Flip 2", year: 2025, status: "released", highlight: "4\" 외부 · Leica · 50MP 망원", imageUrl: "img/xiaomi-mix-flip-2.svg" },
-  { mfr: "xiaomi", category: "foldable", model: "Xiaomi MIX Fold 4", year: 2024, status: "released", highlight: "226g · 티타늄 힌지 · Leica", imageUrl: "img/xiaomi-mix-fold-4.svg" },
+  { mfr: "xiaomi", category: "foldable", model: "Xiaomi MIX Fold 4", year: 2024, status: "released", highlight: "226g · 티타늄 힌지 · Leica", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Xiaomi_MIX_Fold_4_-_About_Phone_%281%29_%28November_1%2C_2024%29.jpg/500px-Xiaomi_MIX_Fold_4_-_About_Phone_%281%29_%28November_1%2C_2024%29.jpg" },
   { mfr: "xiaomi", category: "smartphone", model: "Redmi Note 14 Pro+", year: 2024, status: "released", highlight: "200MP · AMOLED 120Hz · 가성비", imageUrl: "img/redmi-note-14-pro-plus.svg" },
-  { mfr: "xiaomi", category: "wearable", model: "Mi Band 10", year: 2025, status: "released", highlight: "1.72\" AMOLED · 21일 배터리", imageUrl: "img/mi-band-10.svg" },
-  { mfr: "xiaomi", category: "wearable", model: "Mi Band 9 Pro", year: 2024, status: "released", highlight: "AMOLED · GNSS 5계 · 2주", imageUrl: "img/mi-band-9-pro.svg" },
+  { mfr: "xiaomi", category: "wearable", model: "Mi Band 10", year: 2025, status: "released", highlight: "1.72\" AMOLED · 21일 배터리", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Mi_Band.jpg/500px-Mi_Band.jpg" },
+  { mfr: "xiaomi", category: "wearable", model: "Mi Band 9 Pro", year: 2024, status: "released", highlight: "AMOLED · GNSS 5계 · 2주", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Mi_Band.jpg/500px-Mi_Band.jpg" },
   { mfr: "xiaomi", category: "tablet", model: "Xiaomi Pad 7 Pro", year: 2025, status: "released", highlight: "11.2\" 3.2K · SD8s Gen3", imageUrl: "img/xiaomi-pad-7-pro.svg" },
 
   // ========== 4. Google ==========
-  { mfr: "google", category: "smartphone", model: "Pixel 10 Pro XL", year: 2025, status: "released", highlight: "Tensor G5 · Gemini Nano v3 · 6.8\"", imageUrl: "img/pixel-10-pro-xl.svg" },
-  { mfr: "google", category: "smartphone", model: "Pixel 10 Pro", year: 2025, status: "released", highlight: "6.3\" LTPO · 5x 망원 · Gemini", imageUrl: "img/pixel-10-pro.svg" },
-  { mfr: "google", category: "smartphone", model: "Pixel 10", year: 2025, status: "released", highlight: "Tensor G5 · 망원 추가 · 4910mAh", imageUrl: "img/pixel-10.svg" },
+  { mfr: "google", category: "smartphone", model: "Pixel 10 Pro XL", year: 2025, status: "released", highlight: "Tensor G5 · Gemini Nano v3 · 6.8\"", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Pixel_10_front_%28Indigo%29.svg/500px-Pixel_10_front_%28Indigo%29.svg.png" },
+  { mfr: "google", category: "smartphone", model: "Pixel 10 Pro", year: 2025, status: "released", highlight: "6.3\" LTPO · 5x 망원 · Gemini", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Pixel_10_front_%28Indigo%29.svg/500px-Pixel_10_front_%28Indigo%29.svg.png" },
+  { mfr: "google", category: "smartphone", model: "Pixel 10", year: 2025, status: "released", highlight: "Tensor G5 · 망원 추가 · 4910mAh", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Pixel_10_front_%28Indigo%29.svg/500px-Pixel_10_front_%28Indigo%29.svg.png" },
   { mfr: "google", category: "foldable", model: "Pixel 10 Pro Fold", year: 2025, status: "released", highlight: "8\" 내부 · IPX8 · 더 얇음", imageUrl: "img/pixel-10-pro-fold.svg" },
   { mfr: "google", category: "smartphone", model: "Pixel 9 Pro XL", year: 2024, status: "released", highlight: "Tensor G4 · 6.8\" · Gemini", imageUrl: "img/pixel-9-pro-xl.svg" },
-  { mfr: "google", category: "smartphone", model: "Pixel 9a", year: 2025, status: "released", highlight: "보급형 · Tensor G4 · 5100mAh", imageUrl: "img/pixel-9a.svg" },
-  { mfr: "google", category: "tablet", model: "Pixel Tablet 2", year: 2025, status: "rumored", highlight: "Tensor 기반 · Hub 도크 개선", imageUrl: "img/pixel-tablet-2.svg" },
-  { mfr: "google", category: "tablet", model: "Pixel Tablet", year: 2023, status: "released", highlight: "11\" · 충전 도크 · Hub Mode", imageUrl: "img/pixel-tablet.svg" },
-  { mfr: "google", category: "wearable", model: "Pixel Watch 4", year: 2025, status: "released", highlight: "Snapdragon W5 Gen2 · 더 큰 배터리", imageUrl: "img/pixel-watch-4.svg" },
-  { mfr: "google", category: "wearable", model: "Pixel Watch 3", year: 2024, status: "released", highlight: "41/45mm · Loss of Pulse 알림", imageUrl: "img/pixel-watch-3.svg" },
+  { mfr: "google", category: "smartphone", model: "Pixel 9a", year: 2025, status: "released", highlight: "보급형 · Tensor G4 · 5100mAh", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Google_Pixel_9a_%28Peony%29_front.svg/500px-Google_Pixel_9a_%28Peony%29_front.svg.png" },
+  { mfr: "google", category: "tablet", model: "Pixel Tablet 2", year: 2025, status: "rumored", highlight: "Tensor 기반 · Hub 도크 개선", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Pixel_Tablet_front.svg/500px-Pixel_Tablet_front.svg.png" },
+  { mfr: "google", category: "tablet", model: "Pixel Tablet", year: 2023, status: "released", highlight: "11\" · 충전 도크 · Hub Mode", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Pixel_Tablet_front.svg/500px-Pixel_Tablet_front.svg.png" },
+  { mfr: "google", category: "wearable", model: "Pixel Watch 4", year: 2025, status: "released", highlight: "Snapdragon W5 Gen2 · 더 큰 배터리", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Google_Pixel_Watch_-_1.jpg/500px-Google_Pixel_Watch_-_1.jpg" },
+  { mfr: "google", category: "wearable", model: "Pixel Watch 3", year: 2024, status: "released", highlight: "41/45mm · Loss of Pulse 알림", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Google_Pixel_Watch_3-41_%28Champagne_Gold_%2B_Hazel%29.svg/500px-Google_Pixel_Watch_3-41_%28Champagne_Gold_%2B_Hazel%29.svg.png" },
 
   // ========== 5. Huawei ==========
   { mfr: "huawei", category: "smartphone", model: "Mate 80 Pro", year: 2025, status: "released", highlight: "Kirin 9030 · 가변 조리개 메인", imageUrl: "img/mate-80-pro.svg" },
-  { mfr: "huawei", category: "smartphone", model: "Mate 70 Pro+", year: 2024, status: "released", highlight: "Kirin 9020 · XMAGE · 위성 통신", imageUrl: "img/mate-70-pro-plus.svg" },
+  { mfr: "huawei", category: "smartphone", model: "Mate 70 Pro+", year: 2024, status: "released", highlight: "Kirin 9020 · XMAGE · 위성 통신", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/Huawei_Mate_70_%2854235974194%29.jpg/500px-Huawei_Mate_70_%2854235974194%29.jpg" },
   { mfr: "huawei", category: "smartphone", model: "Pura 80 Ultra", year: 2025, status: "released", highlight: "1\" 메인 · 자기장 망원 전환", imageUrl: "img/pura-80-ultra.svg" },
   { mfr: "huawei", category: "foldable", model: "Mate XT 2", year: 2025, status: "released", highlight: "트리폴드 2세대 · 더 얇음", imageUrl: "img/mate-xt-2.svg" },
   { mfr: "huawei", category: "foldable", model: "Mate XT (트리폴드)", year: 2024, status: "released", highlight: "세계 최초 트리폴드 · 10.2\"", imageUrl: "img/mate-xt-트리폴드.svg" },
@@ -95,7 +95,7 @@ const PRODUCTS = [
   { mfr: "huawei", category: "wearable", model: "Watch GT 5 Pro", year: 2024, status: "released", highlight: "티타늄 · 14일 배터리", imageUrl: "img/watch-gt-5-pro.svg" },
 
   // ========== 6. OPPO / Vivo ==========
-  { mfr: "oppo_vivo", category: "smartphone", model: "Vivo X300 Pro", year: 2025, status: "released", highlight: "Dimensity 9500 · ZEISS APO · 200MP", imageUrl: "img/vivo-x300-pro.svg" },
+  { mfr: "oppo_vivo", category: "smartphone", model: "Vivo X300 Pro", year: 2025, status: "released", highlight: "Dimensity 9500 · ZEISS APO · 200MP", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/The_front_of_the_unreleased_vivo_X300_Pro.jpg/500px-The_front_of_the_unreleased_vivo_X300_Pro.jpg" },
   { mfr: "oppo_vivo", category: "smartphone", model: "OPPO Find X9 Pro", year: 2025, status: "released", highlight: "Dimensity 9500 · Hasselblad · 7000mAh", imageUrl: "img/oppo-find-x9-pro.svg" },
   { mfr: "oppo_vivo", category: "smartphone", model: "OPPO Find X8 Pro", year: 2024, status: "released", highlight: "Dimensity 9400 · Hasselblad", imageUrl: "img/oppo-find-x8-pro.svg" },
   { mfr: "oppo_vivo", category: "foldable", model: "OPPO Find N5", year: 2025, status: "released", highlight: "8.93mm · 세계 최슬림 폴더블 · IPX9", imageUrl: "img/oppo-find-n5.svg" },
@@ -104,10 +104,10 @@ const PRODUCTS = [
   { mfr: "oppo_vivo", category: "tablet", model: "OPPO Pad 4 Pro", year: 2025, status: "released", highlight: "13.2\" 3.4K · SD8 Gen3", imageUrl: "img/oppo-pad-4-pro.svg" },
 
   // ========== 7. Meta ==========
-  { mfr: "meta", category: "xr", model: "Quest 3S", year: 2024, status: "released", highlight: "보급형 MR · SD XR2 Gen2", imageUrl: "img/quest-3s.svg" },
-  { mfr: "meta", category: "xr", model: "Quest 3", year: 2023, status: "released", highlight: "MR 표준 · Pancake 렌즈", imageUrl: "img/quest-3.svg" },
+  { mfr: "meta", category: "xr", model: "Quest 3S", year: 2024, status: "released", highlight: "보급형 MR · SD XR2 Gen2", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Meta_Quest_3S_Display_Unit.jpg/500px-Meta_Quest_3S_Display_Unit.jpg" },
+  { mfr: "meta", category: "xr", model: "Quest 3", year: 2023, status: "released", highlight: "MR 표준 · Pancake 렌즈", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Meta_Quest_3_display_unit.jpg/500px-Meta_Quest_3_display_unit.jpg" },
   { mfr: "meta", category: "xr", model: "Quest 4", year: 2026, status: "rumored", highlight: "유출 단계 · 더 가벼움 · MR 강화 예상", imageUrl: "img/quest-4.svg" },
-  { mfr: "meta", category: "xr", model: "Ray-Ban Meta (2세대)", year: 2025, status: "released", highlight: "디스플레이 탑재 · Live AI", imageUrl: "img/ray-ban-meta-2세대.svg" },
+  { mfr: "meta", category: "xr", model: "Ray-Ban Meta (2세대)", year: 2025, status: "released", highlight: "디스플레이 탑재 · Live AI", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Ray-Ban_Stories.jpg/500px-Ray-Ban_Stories.jpg" },
   { mfr: "meta", category: "xr", model: "Orion (개발자 프로토타입)", year: 2024, status: "announced", highlight: "AR 글래스 컨셉 · holographic", imageUrl: "img/orion-개발자-프로토타입.svg" },
 
   // ========== 8. Motorola ==========
@@ -118,15 +118,15 @@ const PRODUCTS = [
   { mfr: "motorola", category: "smartphone", model: "Edge 50 Ultra", year: 2024, status: "released", highlight: "비건 가죽 · 125W · 50MP 메인", imageUrl: "img/edge-50-ultra.svg" },
 
   // ========== 9. Sony ==========
-  { mfr: "sony", category: "smartphone", model: "Xperia 1 VII", year: 2025, status: "released", highlight: "Alpha 옵티컬 줌 · 4K 120Hz", imageUrl: "img/xperia-1-vii.svg" },
-  { mfr: "sony", category: "smartphone", model: "Xperia 1 VI", year: 2024, status: "released", highlight: "Alpha 망원 · FHD+ 120Hz", imageUrl: "img/xperia-1-vi.svg" },
-  { mfr: "sony", category: "smartphone", model: "Xperia 5 VI", year: 2024, status: "released", highlight: "21:9 · 컴팩트 플래그십", imageUrl: "img/xperia-5-vi.svg" },
-  { mfr: "sony", category: "gaming", model: "PlayStation Portal", year: 2023, status: "released", highlight: "8\" 1080p · PS5 리모트", imageUrl: "img/playstation-portal.svg" },
+  { mfr: "sony", category: "smartphone", model: "Xperia 1 VII", year: 2025, status: "released", highlight: "Alpha 옵티컬 줌 · 4K 120Hz", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Sony_Xperia_1.png/500px-Sony_Xperia_1.png" },
+  { mfr: "sony", category: "smartphone", model: "Xperia 1 VI", year: 2024, status: "released", highlight: "Alpha 망원 · FHD+ 120Hz", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Sony_Xperia_1.png/500px-Sony_Xperia_1.png" },
+  { mfr: "sony", category: "smartphone", model: "Xperia 5 VI", year: 2024, status: "released", highlight: "21:9 · 컴팩트 플래그십", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Sony_Xperia_5.jpg/500px-Sony_Xperia_5.jpg" },
+  { mfr: "sony", category: "gaming", model: "PlayStation Portal", year: 2023, status: "released", highlight: "8\" 1080p · PS5 리모트", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/PlayStation_Portal.jpg/500px-PlayStation_Portal.jpg" },
 
   // ========== 10. Asus ==========
-  { mfr: "asus", category: "gaming", model: "ROG Phone 9 Pro", year: 2024, status: "released", highlight: "SD8 Elite · AeroActive 쿨러 X", imageUrl: "img/rog-phone-9-pro.svg" },
+  { mfr: "asus", category: "gaming", model: "ROG Phone 9 Pro", year: 2024, status: "released", highlight: "SD8 Elite · AeroActive 쿨러 X", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/ROG_Phone_9.jpg/500px-ROG_Phone_9.jpg" },
   { mfr: "asus", category: "gaming", model: "ROG Phone 10", year: 2025, status: "rumored", highlight: "SD8 Elite Gen2 · 165Hz LTPO", imageUrl: "img/rog-phone-10.svg" },
-  { mfr: "asus", category: "smartphone", model: "Zenfone 12 Ultra", year: 2025, status: "released", highlight: "6.78\" · SD8 Elite · AI 보조", imageUrl: "img/zenfone-12-ultra.svg" }
+  { mfr: "asus", category: "smartphone", model: "Zenfone 12 Ultra", year: 2025, status: "released", highlight: "6.78\" · SD8 Elite · AI 보조", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Zenfone_12_Ultra.png/500px-Zenfone_12_Ultra.png" }
 ];
 
 // 풀 스펙 데이터 (모델명 키)
