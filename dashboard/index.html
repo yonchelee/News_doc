@@ -1,135 +1,148 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<meta name="theme-color" content="#ffffff" />
-<title>모바일 제품 비교 AI플랫폼</title>
-<link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tech-Lens. — Mobile Spec Dashboard</title>
+<meta name="description" content="전 세계 모바일 디바이스 사양을 추적·분석하는 Tech-Lens AI 대시보드." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="./styles.css" />
 </head>
-<body>
+<body data-theme="dark">
 
-<header class="hero">
-  <p class="kicker">News_doc · AI Compare</p>
-  <h1>모바일 제품 비교<br/>AI플랫폼</h1>
-  <p class="lede">자연어로 묻고, 제품을 즉시 비교하세요. 80여 개 글로벌 라인업.</p>
+<!-- ───── NAV ───── -->
+<header class="nav">
+  <div class="nav__inner">
+    <a class="brand" href="#top" aria-label="Tech-Lens">
+      <span class="brand__dot" aria-hidden="true"></span>
+      <span class="brand__name">Tech-Lens.</span>
+    </a>
+    <nav class="nav__links" aria-label="Primary">
+      <a href="#makers">Makers</a>
+      <a href="#catalog">Catalog</a>
+      <a href="#compare">Compare</a>
+      <a href="#parser">Parser</a>
+    </nav>
+    <button id="themeToggle" class="theme-btn" aria-label="Toggle theme">
+      <span class="theme-btn__icon"></span>
+    </button>
+  </div>
 </header>
 
-<!-- ========== 통합 입력창 ========== -->
-<section class="input-shell">
-  <label class="ask-field">
-    <span class="visually-hidden">질문 또는 검색</span>
-    <span class="ask-icon" aria-hidden="true">✦</span>
-    <input id="ask" type="text" autocomplete="off"
-           placeholder="검색 또는 자연어로 질문 — 예: 갤럭시 폴드7 vs 아이폰 17 프로, 2025 폴더블 추천" />
-    <button type="button" id="ask-go" class="ask-go" aria-label="실행">→</button>
-  </label>
-  <div class="ask-meta">
-    <span class="ai-status" id="ai-status" title="AI 엔진 상태">
-      <span class="ai-dot" data-state="checking"></span>
-      <span class="ai-status-label">연결 확인 중</span>
-    </span>
-    <button type="button" class="settings-btn" id="open-settings" aria-label="AI 설정">설정</button>
-    <span class="result-count" id="count">전체 –</span>
+<!-- ───── HERO ───── -->
+<section id="top" class="hero">
+  <div class="hero__grain" aria-hidden="true"></div>
+  <div class="hero__inner">
+    <p class="eyebrow reveal">Tech-Lens AI · 2026.04.29</p>
+    <h1 class="hero__title reveal">
+      모바일의 진실,<br/>
+      <span class="hero__title--accent">사양에서</span> 시작된다.
+    </h1>
+    <p class="hero__sub reveal">
+      Apple · Samsung · Xiaomi · Google · Huawei · OPPO/Vivo · Meta · Motorola · Sony · Asus.<br/>
+      10개 제조사의 전 라인업을 한 시야로.
+    </p>
+    <div class="hero__cta reveal">
+      <a class="btn btn--primary" href="#catalog">카탈로그</a>
+      <a class="btn btn--ghost" href="#compare">비교하기</a>
+    </div>
+  </div>
+  <div class="hero__float" aria-hidden="true">
+    <div class="float-obj float-obj--phone"></div>
+    <div class="float-obj float-obj--watch"></div>
+    <div class="float-obj float-obj--xr"></div>
   </div>
 </section>
 
-<!-- ========== AI 인사이트 패널 (입력창 바로 아래, 수직 흐름) ========== -->
-<aside class="ai-panel" aria-label="AI 응답">
-  <header class="ai-panel-head">
-    <h2>AI 인사이트</h2>
-    <span class="ai-engine" id="ai-engine">대기 중</span>
-  </header>
-  <div class="ai-panel-body" id="ai-body">
-    <div class="ai-empty">
-      <p class="ai-empty-title">자연어로 질문하면 AI가 분석해 드립니다.</p>
-      <ul class="ai-empty-list">
-        <li>"갤럭시 Z Fold7 vs 아이폰 17 프로 맥스"</li>
-        <li>"2025년에 나온 폴더블 추천"</li>
-        <li>"가성비 좋은 게이밍 폰"</li>
-        <li>"Vision Pro M5 특징"</li>
-      </ul>
-    </div>
+<!-- ───── MAKERS ───── -->
+<section id="makers" class="section">
+  <div class="section__head">
+    <p class="eyebrow">Makers</p>
+    <h2 class="section__title">10개 제조사,<br/>각자의 강점.</h2>
+    <p class="section__lede">PDF "제조사 정보_검색용" 기준 · Source-First.</p>
   </div>
-</aside>
-
-<!-- ========== 필터 칩 ========== -->
-<section class="filters" aria-label="필터">
-  <details class="filter-group">
-    <summary>제조사</summary>
-    <div class="chip-row" id="mfr-chips" role="group"></div>
-  </details>
-  <details class="filter-group">
-    <summary>카테고리</summary>
-    <div class="chip-row" id="cat-chips" role="group"></div>
-  </details>
+  <div class="makers" id="makersGrid"></div>
 </section>
 
-<!-- ========== 카드 그리드 (전체 너비) ========== -->
-<main id="grid" class="grid" aria-live="polite"></main>
+<!-- ───── CATALOG ───── -->
+<section id="catalog" class="section section--alt">
+  <div class="section__head">
+    <p class="eyebrow">Catalog</p>
+    <h2 class="section__title">제품군.<br/>전부.</h2>
+    <p class="section__lede">제조사 × 카테고리 필터로 탐색.</p>
+  </div>
 
-<section class="empty" id="empty" hidden>
-  <p>조건에 맞는 제품이 없어요.</p>
-  <button type="button" id="reset">필터 초기화</button>
+  <div class="filters">
+    <div class="filter-row">
+      <span class="filter-row__label">Maker</span>
+      <div class="chips" id="makerChips"></div>
+    </div>
+    <div class="filter-row">
+      <span class="filter-row__label">Category</span>
+      <div class="chips" id="categoryChips"></div>
+    </div>
+  </div>
+
+  <p class="catalog__count" id="catalogCount"></p>
+  <div class="catalog" id="catalogGrid"></div>
 </section>
 
-<!-- ========== 비교 트레이 + 모달 (이전 PR에서 유지) ========== -->
-<aside class="cmp-bar" id="cmp-bar" hidden aria-label="비교 트레이">
-  <div class="cmp-inner">
-    <div class="cmp-slots" role="list"></div>
-    <div class="cmp-actions">
-      <button type="button" id="cmp-clear" class="cmp-btn cmp-btn-ghost">비우기</button>
-      <button type="button" id="cmp-open"  class="cmp-btn cmp-btn-primary" disabled>비교하기</button>
+<!-- ───── COMPARE ───── -->
+<section id="compare" class="section">
+  <div class="section__head section__head--right">
+    <p class="eyebrow">Compare</p>
+    <h2 class="section__title">두 기기,<br/>객관적 차이.</h2>
+    <p class="section__lede">수치 우위를 자동 산출합니다.</p>
+  </div>
+
+  <div class="compare">
+    <div class="compare__pickers">
+      <label class="picker">
+        <span>Device A</span>
+        <select id="pickA"></select>
+      </label>
+      <div class="vs" aria-hidden="true">vs</div>
+      <label class="picker">
+        <span>Device B</span>
+        <select id="pickB"></select>
+      </label>
     </div>
+    <div class="compare__table" id="compareTable"></div>
+    <div class="compare__insight" id="compareInsight"></div>
   </div>
-</aside>
+</section>
 
-<div class="cmp-modal" id="cmp-modal" hidden role="dialog" aria-modal="true" aria-labelledby="cmp-modal-title">
-  <div class="cmp-modal-backdrop" data-close></div>
-  <div class="cmp-modal-card">
-    <header class="cmp-modal-head">
-      <h2 id="cmp-modal-title">제품 비교</h2>
-      <button type="button" class="cmp-close" data-close aria-label="닫기">×</button>
-    </header>
-    <div class="cmp-modal-body" id="cmp-modal-body"></div>
+<!-- ───── PARSER ───── -->
+<section id="parser" class="section section--alt">
+  <div class="section__head">
+    <p class="eyebrow">Parser</p>
+    <h2 class="section__title">붙여넣기,<br/>스펙 시트로.</h2>
+    <p class="section__lede">웹에서 긁어온 텍스트를 구조화된 정보로.</p>
   </div>
-</div>
 
-<!-- ========== AI 설정 모달 ========== -->
-<div class="cmp-modal" id="settings-modal" hidden role="dialog" aria-modal="true">
-  <div class="cmp-modal-backdrop" data-close></div>
-  <div class="cmp-modal-card">
-    <header class="cmp-modal-head">
-      <h2>AI 엔진 설정</h2>
-      <button type="button" class="cmp-close" data-close aria-label="닫기">×</button>
-    </header>
-    <div class="cmp-modal-body settings-body">
-      <p class="settings-p">3가지 엔진을 우선순위 순서로 자동 사용합니다.</p>
-      <div class="setting-row">
-        <h3>1. Ollama (로컬)</h3>
-        <p>localhost:11434 · 무료 · README 참고</p>
-        <p class="hint" id="ollama-hint">상태 확인 중…</p>
-      </div>
-      <div class="setting-row">
-        <h3>2. Groq API 키</h3>
-        <p>무료 티어 · 매우 빠름 · llama-3.3-70b 호출</p>
-        <input type="password" id="groq-key" placeholder="gsk_..." class="key-input" />
-        <button type="button" class="cmp-btn cmp-btn-ghost" data-save="groq">저장</button>
-        <button type="button" class="cmp-btn cmp-btn-ghost" data-clear="groq">지우기</button>
-      </div>
-      <div class="setting-row">
-        <h3>3. Google Gemini API 키</h3>
-        <p>무료 티어 · gemini-2.0-flash 호출</p>
-        <input type="password" id="gemini-key" placeholder="AIza..." class="key-input" />
-        <button type="button" class="cmp-btn cmp-btn-ghost" data-save="gemini">저장</button>
-        <button type="button" class="cmp-btn cmp-btn-ghost" data-clear="gemini">지우기</button>
-      </div>
-      <p class="settings-foot">키는 이 브라우저의 localStorage 에만 저장됩니다. 서버 전송 없음.</p>
+  <div class="parser">
+    <textarea id="parserInput" rows="8"
+      placeholder="예) Galaxy S26 Ultra | 6.9-inch Dynamic AMOLED 2X | Snapdragon 8 Gen 5 | 5,200mAh | 200MP | 8K ..."></textarea>
+    <div class="parser__actions">
+      <button class="btn btn--primary" id="parseBtn">스펙 시트 변환</button>
+      <button class="btn btn--ghost" id="parseClear">초기화</button>
     </div>
+    <div class="parser__output" id="parserOutput"></div>
   </div>
-</div>
+</section>
 
-<script src="data.js"></script>
-<script src="app.js"></script>
+<!-- ───── FOOTER ───── -->
+<footer class="footer">
+  <div class="footer__inner">
+    <p class="footer__brand">Tech-Lens.</p>
+    <p class="footer__meta">Apple Minimalism × Source-First · © 2026 yonchelee</p>
+    <p class="footer__src">Source: 각 제조사 공식 제품 페이지 · 미확인 항목 "정보 미제공"</p>
+  </div>
+</footer>
+
+<script src="./data.js"></script>
+<script src="./app.js"></script>
 </body>
 </html>
