@@ -1,148 +1,19 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Tech-Lens. — Mobile Spec Dashboard</title>
-<meta name="description" content="전 세계 모바일 디바이스 사양을 추적·분석하는 Tech-Lens AI 대시보드." />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="./styles.css" />
+  <meta charset="utf-8" />
+  <meta http-equiv="refresh" content="0; url=dashboard/" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tech-Lens. — 모바일 스펙 대시보드</title>
+  <style>
+    body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif;
+         background:#000;color:#fff;margin:0;padding:48px 24px;text-align:center;}
+    a{color:#fff;text-decoration:underline;text-underline-offset:3px;}
+  </style>
 </head>
-<body data-theme="dark">
-
-<!-- ───── NAV ───── -->
-<header class="nav">
-  <div class="nav__inner">
-    <a class="brand" href="#top" aria-label="Tech-Lens">
-      <span class="brand__dot" aria-hidden="true"></span>
-      <span class="brand__name">Tech-Lens.</span>
-    </a>
-    <nav class="nav__links" aria-label="Primary">
-      <a href="#makers">Makers</a>
-      <a href="#catalog">Catalog</a>
-      <a href="#compare">Compare</a>
-      <a href="#parser">Parser</a>
-    </nav>
-    <button id="themeToggle" class="theme-btn" aria-label="Toggle theme">
-      <span class="theme-btn__icon"></span>
-    </button>
-  </div>
-</header>
-
-<!-- ───── HERO ───── -->
-<section id="top" class="hero">
-  <div class="hero__grain" aria-hidden="true"></div>
-  <div class="hero__inner">
-    <p class="eyebrow reveal">Tech-Lens AI · 2026.04.29</p>
-    <h1 class="hero__title reveal">
-      모바일의 진실,<br/>
-      <span class="hero__title--accent">사양에서</span> 시작된다.
-    </h1>
-    <p class="hero__sub reveal">
-      Apple · Samsung · Xiaomi · Google · Huawei · OPPO/Vivo · Meta · Motorola · Sony · Asus.<br/>
-      10개 제조사의 전 라인업을 한 시야로.
-    </p>
-    <div class="hero__cta reveal">
-      <a class="btn btn--primary" href="#catalog">카탈로그</a>
-      <a class="btn btn--ghost" href="#compare">비교하기</a>
-    </div>
-  </div>
-  <div class="hero__float" aria-hidden="true">
-    <div class="float-obj float-obj--phone"></div>
-    <div class="float-obj float-obj--watch"></div>
-    <div class="float-obj float-obj--xr"></div>
-  </div>
-</section>
-
-<!-- ───── MAKERS ───── -->
-<section id="makers" class="section">
-  <div class="section__head">
-    <p class="eyebrow">Makers</p>
-    <h2 class="section__title">10개 제조사,<br/>각자의 강점.</h2>
-    <p class="section__lede">PDF "제조사 정보_검색용" 기준 · Source-First.</p>
-  </div>
-  <div class="makers" id="makersGrid"></div>
-</section>
-
-<!-- ───── CATALOG ───── -->
-<section id="catalog" class="section section--alt">
-  <div class="section__head">
-    <p class="eyebrow">Catalog</p>
-    <h2 class="section__title">제품군.<br/>전부.</h2>
-    <p class="section__lede">제조사 × 카테고리 필터로 탐색.</p>
-  </div>
-
-  <div class="filters">
-    <div class="filter-row">
-      <span class="filter-row__label">Maker</span>
-      <div class="chips" id="makerChips"></div>
-    </div>
-    <div class="filter-row">
-      <span class="filter-row__label">Category</span>
-      <div class="chips" id="categoryChips"></div>
-    </div>
-  </div>
-
-  <p class="catalog__count" id="catalogCount"></p>
-  <div class="catalog" id="catalogGrid"></div>
-</section>
-
-<!-- ───── COMPARE ───── -->
-<section id="compare" class="section">
-  <div class="section__head section__head--right">
-    <p class="eyebrow">Compare</p>
-    <h2 class="section__title">두 기기,<br/>객관적 차이.</h2>
-    <p class="section__lede">수치 우위를 자동 산출합니다.</p>
-  </div>
-
-  <div class="compare">
-    <div class="compare__pickers">
-      <label class="picker">
-        <span>Device A</span>
-        <select id="pickA"></select>
-      </label>
-      <div class="vs" aria-hidden="true">vs</div>
-      <label class="picker">
-        <span>Device B</span>
-        <select id="pickB"></select>
-      </label>
-    </div>
-    <div class="compare__table" id="compareTable"></div>
-    <div class="compare__insight" id="compareInsight"></div>
-  </div>
-</section>
-
-<!-- ───── PARSER ───── -->
-<section id="parser" class="section section--alt">
-  <div class="section__head">
-    <p class="eyebrow">Parser</p>
-    <h2 class="section__title">붙여넣기,<br/>스펙 시트로.</h2>
-    <p class="section__lede">웹에서 긁어온 텍스트를 구조화된 정보로.</p>
-  </div>
-
-  <div class="parser">
-    <textarea id="parserInput" rows="8"
-      placeholder="예) Galaxy S26 Ultra | 6.9-inch Dynamic AMOLED 2X | Snapdragon 8 Gen 5 | 5,200mAh | 200MP | 8K ..."></textarea>
-    <div class="parser__actions">
-      <button class="btn btn--primary" id="parseBtn">스펙 시트 변환</button>
-      <button class="btn btn--ghost" id="parseClear">초기화</button>
-    </div>
-    <div class="parser__output" id="parserOutput"></div>
-  </div>
-</section>
-
-<!-- ───── FOOTER ───── -->
-<footer class="footer">
-  <div class="footer__inner">
-    <p class="footer__brand">Tech-Lens.</p>
-    <p class="footer__meta">Apple Minimalism × Source-First · © 2026 yonchelee</p>
-    <p class="footer__src">Source: 각 제조사 공식 제품 페이지 · 미확인 항목 "정보 미제공"</p>
-  </div>
-</footer>
-
-<script src="./data.js"></script>
-<script src="./app.js"></script>
+<body>
+  <p>Tech-Lens. 대시보드로 이동 중…</p>
+  <p>자동 이동되지 않으면 <a href="dashboard/">여기를 클릭</a>하세요.</p>
+  <script>location.replace("dashboard/");</script>
 </body>
 </html>
