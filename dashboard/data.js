@@ -2414,7 +2414,8 @@ const SPECS = {
         "ultrawide": "40 MP",
         "telephoto": "48 MP 4×"
       },
-      "front": "8 MP"
+      "front": "8 MP",
+      "rear_text": "Triple camera setup: • 50 MP, f/1.4-f/4.0, 24mm (wide), PDAF, OIS • 48 MP, f/3.0, 90mm (periscope telephoto), PDAF, OIS, 4x optical zoom • 40 MP, f/2.2, 13mm, 120˚ (ultrawide), PDAF Features: Laser AF, color spectrum sensor, LED flash Video: 1080p / 4K"
     },
     "battery": {
       "capacity": "5110 mAh",
@@ -2432,7 +2433,10 @@ const SPECS = {
       "launchDate": "2024-12-12"
     },
     "source": "https://consumer.huawei.com/cn/phones/mate-x6/",
-    "lastUpdated": "2026-04-29"
+    "lastUpdated": "2026-06-20",
+    "connectivity": {
+      "summary": "Wi-Fi 6 (802.11 a/b/g/n/ac/6), dual-band, Wi-Fi Direct Bluetooth 5.2, A2DP, LE, L2HC GPS (L1+L5), GLONASS (L1), BDS (B1I+B1c+B2a+B2b), GALILEO (E1+E5a+E5b), QZSS (L1+L5), NavIC NFC , Infrared port, USB-C 3.1 (OTG, DisplayPort 1.2)"
+    }
   },
   "Watch Ultimate 2": {
     "design": {
