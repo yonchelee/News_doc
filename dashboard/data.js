@@ -3244,11 +3244,13 @@ const SPECS = {
     "os": {
       "initial": "Android 9 \"Pie\" upgradeable to Android 11"
     },
-    "durability": {},
+    "durability": {
+      "ip": "IP65/68"
+    },
     "price": {
       "launchDate": "24&#160;September 2019 &#59;&#32;6 years ago &#160;( 2019-09-24 )"
     },
-    "lastUpdated": "2026-04-29",
+    "lastUpdated": "2026-07-18",
     "source": "https://en.wikipedia.org/wiki/Sony_Xperia_5"
   },
   "PlayStation Portal": {
