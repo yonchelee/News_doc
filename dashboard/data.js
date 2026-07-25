@@ -1465,7 +1465,8 @@ const SPECS = {
       "launchDate": "2025-07-25"
     },
     "source": "https://www.samsung.com/sec/watches/galaxy-watch/",
-    "lastUpdated": "2026-04-29"
+    "lastUpdated": "2026-04-29",
+    "camera": {}
   },
   "Galaxy Watch Ultra (2025)": {
     "design": {},
